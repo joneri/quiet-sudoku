@@ -28,6 +28,7 @@ struct FloatingWindowConfigurator: NSViewRepresentable {
         window.backgroundColor = .clear
         window.isOpaque = false
         window.hasShadow = true
+        window.alphaValue = 0.98
         window.collectionBehavior.insert([.canJoinAllSpaces, .fullScreenAuxiliary])
         window.standardWindowButton(.closeButton)?.isHidden = true
         window.standardWindowButton(.miniaturizeButton)?.isHidden = true
@@ -35,4 +36,3 @@ struct FloatingWindowConfigurator: NSViewRepresentable {
         window.styleMask.insert(.fullSizeContentView)
     }
 }
-

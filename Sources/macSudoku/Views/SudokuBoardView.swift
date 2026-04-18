@@ -3,7 +3,6 @@ import SwiftUI
 struct SudokuBoardView: View {
     @State var game: SudokuGame
     @State private var selectedCell: SudokuGame.Cell.ID?
-    @FocusState private var boardHasFocus: Bool
 
     var body: some View {
         GeometryReader { proxy in
@@ -21,12 +20,13 @@ struct SudokuBoardView: View {
                                 SudokuCellView(
                                     cell: cell,
                                     isSelected: selectedCell == cell.id,
-                                    isPeer: selectedCell.map { isPeer(cell.id, $0) } ?? false
+                                    isPeer: selectedCell.map { isPeer(cell.id, $0) } ?? false,
+                                    isMatched: game.isMatchingSelectedValue(cell, selectedCellID: selectedCell),
+                                    hasConflict: game.hasConflict(at: row, column: column)
                                 )
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     selectedCell = cell.id
-                                    boardHasFocus = true
                                 }
                             }
                         }
@@ -35,26 +35,25 @@ struct SudokuBoardView: View {
                 .frame(width: side, height: side)
                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 .overlay(gridLines)
+                .overlay(completionGlow)
                 .padding(0)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .aspectRatio(1, contentMode: .fit)
-        .focusable()
-        .focused($boardHasFocus)
-        .focusEffectDisabled()
-        .onAppear {
-            boardHasFocus = true
-            selectedCell = selectedCell ?? game.cells.first(where: { !$0.isGiven })?.id
+        .background {
+            KeyboardInputBridge { input in
+                handleKeyboardInput(input)
+            }
         }
-        .onKeyPress { press in
-            handleKeyPress(press)
+        .onAppear {
+            selectedCell = selectedCell ?? game.cells.first(where: { !$0.isGiven })?.id
         }
     }
 
     private var boardBackground: some View {
         Rectangle()
-            .fill(.ultraThinMaterial)
+            .fill(.thinMaterial)
             .overlay {
                 LinearGradient(
                     colors: [
@@ -66,6 +65,32 @@ struct SudokuBoardView: View {
                     endPoint: .bottomTrailing
                 )
                 .blendMode(.plusLighter)
+            }
+            .overlay(alignment: .topLeading) {
+                RadialGradient(
+                    colors: [
+                        Color.white.opacity(0.22),
+                        Color.clear
+                    ],
+                    center: .topLeading,
+                    startRadius: 0,
+                    endRadius: 420
+                )
+                .blendMode(.screen)
+                .allowsHitTesting(false)
+            }
+            .overlay(alignment: .bottomTrailing) {
+                RadialGradient(
+                    colors: [
+                        Color.black.opacity(0.16),
+                        Color.clear
+                    ],
+                    center: .bottomTrailing,
+                    startRadius: 0,
+                    endRadius: 520
+                )
+                .blendMode(.softLight)
+                .allowsHitTesting(false)
             }
             .ignoresSafeArea()
     }
@@ -96,47 +121,45 @@ struct SudokuBoardView: View {
                     path.addLine(to: CGPoint(x: proxy.size.width, y: position))
                 }
             }
-            .stroke(Color.primary.opacity(0.62), lineWidth: 2.5)
+                .stroke(Color.primary.opacity(0.62), lineWidth: 2.5)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(Color.white.opacity(0.20), lineWidth: 1)
+                .blendMode(.plusLighter)
         }
         .allowsHitTesting(false)
     }
 
-    private func handleKeyPress(_ press: KeyPress) -> KeyPress.Result {
+    @ViewBuilder
+    private var completionGlow: some View {
+        if game.isComplete {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Color.green.opacity(0.95), lineWidth: 4)
+                .shadow(color: Color.green.opacity(0.55), radius: 18)
+                .padding(2)
+                .allowsHitTesting(false)
+        }
+    }
+
+    private func handleKeyboardInput(_ input: SudokuKeyboardInput) -> Bool {
         guard let selectedCell else {
-            return .ignored
+            return false
         }
 
         let row = selectedCell / 9
         let column = selectedCell % 9
 
-        if let character = press.characters.first, let value = Int(String(character)), (1...9).contains(value) {
+        switch input {
+        case .digit(let value):
             game.setValue(value, row: row, column: column)
-            return .handled
-        }
-
-        switch press.key {
-        case .delete, .deleteForward:
+            return true
+        case .clear:
             game.setValue(nil, row: row, column: column)
-            return .handled
-        case .upArrow:
-            moveSelection(rowDelta: -1, columnDelta: 0)
-            return .handled
-        case .downArrow:
-            moveSelection(rowDelta: 1, columnDelta: 0)
-            return .handled
-        case .leftArrow:
-            moveSelection(rowDelta: 0, columnDelta: -1)
-            return .handled
-        case .rightArrow:
-            moveSelection(rowDelta: 0, columnDelta: 1)
-            return .handled
-        default:
-            if press.characters == "0" || press.characters == " " {
-                game.setValue(nil, row: row, column: column)
-                return .handled
-            }
-
-            return .ignored
+            return true
+        case .move(let rowDelta, let columnDelta):
+            moveSelection(rowDelta: rowDelta, columnDelta: columnDelta)
+            return true
         }
     }
 

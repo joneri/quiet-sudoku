@@ -4,14 +4,29 @@
   "cost_profile": "Standard",
   "epic": {
     "title": "Floating edge-to-edge macOS Sudoku",
-    "status": "in_progress"
+    "status": "final_review"
   },
-  "current_role": "PO",
+  "current_role": "Reviewer",
   "current_gate": "E",
   "increments": [
     {
       "id": "DI-001",
       "title": "Playable floating Sudoku window",
+      "status": "accepted"
+    },
+    {
+      "id": "DI-002",
+      "title": "Quiet validation and completion feedback",
+      "status": "accepted"
+    },
+    {
+      "id": "DI-003",
+      "title": "Polished floating glass surface",
+      "status": "accepted"
+    },
+    {
+      "id": "DI-004",
+      "title": "Reliable board keyboard input",
       "status": "accepted"
     }
   ]

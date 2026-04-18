@@ -4,6 +4,8 @@ struct SudokuCellView: View {
     let cell: SudokuGame.Cell
     let isSelected: Bool
     let isPeer: Bool
+    let isMatched: Bool
+    let hasConflict: Bool
 
     var body: some View {
         ZStack {
@@ -12,9 +14,9 @@ struct SudokuCellView: View {
 
             if let value = cell.displayValue {
                 Text("\(value)")
-                    .font(.system(size: 28, weight: cell.isGiven ? .semibold : .medium, design: .rounded))
+                    .font(.system(size: 30, weight: cell.isGiven ? .semibold : .medium, design: .rounded))
                     .minimumScaleFactor(0.45)
-                    .foregroundStyle(cell.isGiven ? .primary : Color.cyan)
+                    .foregroundStyle(foregroundStyle)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
@@ -29,8 +31,16 @@ struct SudokuCellView: View {
     }
 
     private var backgroundStyle: Color {
+        if hasConflict {
+            return Color.red.opacity(isSelected ? 0.30 : 0.18)
+        }
+
         if isSelected {
             return Color.green.opacity(0.22)
+        }
+
+        if isMatched {
+            return Color.cyan.opacity(0.14)
         }
 
         if isPeer {
@@ -39,5 +49,12 @@ struct SudokuCellView: View {
 
         return Color.primary.opacity(cell.isGiven ? 0.025 : 0.01)
     }
-}
 
+    private var foregroundStyle: Color {
+        if hasConflict {
+            return Color.red.opacity(0.95)
+        }
+
+        return cell.isGiven ? Color.primary : Color.cyan.opacity(0.95)
+    }
+}
