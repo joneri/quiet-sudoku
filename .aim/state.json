@@ -1,0 +1,18 @@
+{
+  "aim_version": "1.6",
+  "mode": "Auto",
+  "cost_profile": "Standard",
+  "epic": {
+    "title": "Floating edge-to-edge macOS Sudoku",
+    "status": "in_progress"
+  },
+  "current_role": "PO",
+  "current_gate": "E",
+  "increments": [
+    {
+      "id": "DI-001",
+      "title": "Playable floating Sudoku window",
+      "status": "accepted"
+    }
+  ]
+}
