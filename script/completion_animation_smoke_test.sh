@@ -245,6 +245,7 @@ wait_for_state 'state["selected"]["row"] == 0 and state["selected"]["column"] ==
 send_text "4"
 wait_for_state 'state["isComplete"] == False and state["sparkleTriggerCount"] == 0' "final digit floats before lock"
 press_accessibility_button "lock-candidate-cell-0-3"
-wait_for_state 'state["isComplete"] == True and state["sparkleTriggerCount"] == 1 and state["livesRemaining"] == 4' "final correct digit solves puzzle, triggers exactly one sparkle, and awards one heart"
+wait_for_state 'state["isComplete"] == True and state["sparkleTriggerCount"] == 1 and state["livesRemaining"] == 4 and state["isShowingCompletionMessage"] == True and state["isConfirmingNewBoard"] == False' "final correct digit solves puzzle, triggers exactly one sparkle, awards one heart, and shows congratulations"
+wait_for_state 'state["isComplete"] == True and state["sparkleTriggerCount"] == 1 and state["livesRemaining"] == 4 and state["isShowingCompletionMessage"] == False and state["isConfirmingNewBoard"] == True' "completion prompt appears after congratulations"
 
-echo "Completion animation smoke test passed: sparkle triggers only when the puzzle becomes complete and awards one heart."
+echo "Completion animation smoke test passed: sparkle triggers only when the puzzle becomes complete, awards one heart, then prompts for a new board."

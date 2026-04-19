@@ -3,6 +3,7 @@ import Foundation
 @Observable
 final class SudokuSessionStore {
     static let startingLives = 3
+    static let maximumLives = 5
 
     private let generator: SudokuPuzzleGenerator
     private let persistence: SudokuGamePersistence
@@ -106,7 +107,9 @@ final class SudokuSessionStore {
     }
 
     func generateNewBoard() {
-        let nextLives = isGameOver ? Self.startingLives : max(Self.startingLives, livesRemaining)
+        let nextLives = isGameOver
+            ? Self.startingLives
+            : min(Self.maximumLives, max(Self.startingLives, livesRemaining))
         game = SudokuGame(puzzle: generator.generate())
         selectedCell = game.firstEditableCellID
         livesRemaining = nextLives
@@ -114,6 +117,8 @@ final class SudokuSessionStore {
     }
 
     func awardCompletionLife() {
+        guard livesRemaining < Self.maximumLives else { return }
+
         livesRemaining += 1
         save()
     }

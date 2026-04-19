@@ -4,10 +4,10 @@
   "cost_profile": "Cost Control",
   "epic": {
     "title": "Candidate locking, inline lock actions, and lives",
-    "status": "final_review"
+    "status": "closed"
   },
   "current_role": "PO",
-  "current_gate": "E",
+  "current_gate": "closed",
   "increments": [
     {
       "id": "LOCK-001",
@@ -27,6 +27,11 @@
     {
       "id": "LOCK-004",
       "title": "Inline candidate locks, Lock all, and three-life baseline",
+      "status": "accepted"
+    },
+    {
+      "id": "LOCK-005",
+      "title": "Completion congratulations and new-board prompt",
       "status": "accepted"
     }
   ]

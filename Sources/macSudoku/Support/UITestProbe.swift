@@ -11,6 +11,7 @@ enum UITestProbe {
     static func record(
         snapshot: SudokuSessionSnapshot,
         isConfirmingNewBoard: Bool,
+        isShowingCompletionMessage: Bool,
         isGameOver: Bool,
         sparkleTriggerCount: Int
     ) {
@@ -86,6 +87,7 @@ enum UITestProbe {
             "isComplete": snapshot.isComplete,
             "isConfirmingNewBoard": isConfirmingNewBoard,
             "isGameOver": isGameOver,
+            "isShowingCompletionMessage": isShowingCompletionMessage,
             "livesRemaining": snapshot.livesRemaining,
             "puzzleSignature": snapshot.puzzle.puzzle.flatMap { $0 }.map(String.init).joined(separator: ","),
             "sparkleTriggerCount": sparkleTriggerCount,

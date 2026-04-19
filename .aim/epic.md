@@ -2,7 +2,7 @@
 
 Add a candidate-locking life system to macSudoku.
 
-Players should be able to type any digit into an editable cell at any time, but typed digits should start as unlocked candidates that float above the glass board. Candidates only count toward the Sudoku solution after the player presses a lock button. Locking a correct candidate commits it calmly into the board. Locking an incorrect candidate costs one life. The player starts with three lives, shown as centered hearts in the top button shelf; each lost life removes the red fill from one heart. Solving a board awards one extra heart.
+Players should be able to type any digit into an editable cell at any time, but typed digits should start as unlocked candidates that float above the glass board. Candidates only count toward the Sudoku solution after the player presses a lock button. Locking a correct candidate commits it calmly into the board. Locking an incorrect candidate costs one life. The player starts with three lives, shown as centered hearts in the top button shelf; each lost life removes the red fill from one heart. Solving a board awards one extra heart up to a maximum of five, celebrates the win, and then asks whether to generate a new board.
 
 ## Acceptance Criteria
 
@@ -14,7 +14,8 @@ Players should be able to type any digit into an editable cell at any time, but 
 - Incorrect locked candidates remain unlocked and reduce lives by one.
 - Lives start at three and are visible as hearts centered in the top shelf.
 - Lost lives are represented by removing the red fill from one heart per lost life.
-- Completing a board awards one extra heart for the next board.
+- Completing a board awards one extra heart for the next board when the player has fewer than five hearts.
+- Completing a board shows "Congratulations!" after the success animation starts, then opens the same confirmation used by the New button.
 - Candidates, committed values, selected cell, board size, and lives persist across relaunch.
 - New boards clear old candidates. Game Over resets lives to three, while normal new boards preserve any earned extra hearts.
 - Existing progression, completion animation, new-board confirmation, mouse selection, keyboard input, and sizing behavior continue to work.

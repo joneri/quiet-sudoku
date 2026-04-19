@@ -3,6 +3,7 @@ import SwiftUI
 struct SudokuBoardView: View {
     @State private var store: SudokuSessionStore
     @State private var isConfirmingNewBoard = false
+    @State private var isShowingCompletionMessage = false
     @State private var sparkleTriggerCount = 0
     @State private var wasComplete = false
 
@@ -44,6 +45,10 @@ struct SudokuBoardView: View {
                     gameOverOverlay
                 }
 
+                if isShowingCompletionMessage && !isConfirmingNewBoard {
+                    completionOverlay
+                }
+
                 if isConfirmingNewBoard {
                     Color.black.opacity(0.10)
                         .ignoresSafeArea()
@@ -79,12 +84,14 @@ struct SudokuBoardView: View {
         }
         .onChange(of: store.livesRemaining) { _, livesRemaining in
             if livesRemaining == 0 {
+                isShowingCompletionMessage = false
                 isConfirmingNewBoard = true
             }
             recordUITestState()
         }
         .animation(.snappy(duration: 0.24), value: store.boardSize)
         .animation(.snappy(duration: 0.18), value: isConfirmingNewBoard)
+        .animation(.smooth(duration: 0.24), value: isShowingCompletionMessage)
     }
 
     private var boardBackground: some View {
@@ -150,6 +157,29 @@ struct SudokuBoardView: View {
         .accessibilityIdentifier("game-over-overlay")
     }
 
+    private var completionOverlay: some View {
+        Text("Congratulations!")
+            .font(.system(size: 42, weight: .black, design: .rounded))
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.98),
+                        Color.green.opacity(0.94),
+                        Color.cyan.opacity(0.78)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .shadow(color: Color.green.opacity(0.62), radius: 18)
+            .shadow(color: Color.black.opacity(0.32), radius: 12, y: 6)
+            .frame(width: store.boardSize.boardSide, height: store.boardSize.windowHeight)
+            .background(Color.black.opacity(0.08))
+            .allowsHitTesting(false)
+            .accessibilityLabel("Congratulations!")
+            .accessibilityIdentifier("completion-congratulations-overlay")
+    }
+
     private func cycleBoardSize() {
         store.cycleBoardSize()
         recordUITestState()
@@ -173,11 +203,13 @@ struct SudokuBoardView: View {
     }
 
     private func requestNewBoard() {
+        isShowingCompletionMessage = false
         isConfirmingNewBoard = true
         recordUITestState()
     }
 
     private func confirmNewBoard() {
+        isShowingCompletionMessage = false
         isConfirmingNewBoard = false
         store.generateNewBoard()
         wasComplete = store.game.isComplete
@@ -185,6 +217,7 @@ struct SudokuBoardView: View {
     }
 
     private func cancelNewBoard() {
+        isShowingCompletionMessage = false
         isConfirmingNewBoard = false
         recordUITestState()
     }
@@ -193,6 +226,7 @@ struct SudokuBoardView: View {
         UITestProbe.record(
             snapshot: store.snapshot(),
             isConfirmingNewBoard: isConfirmingNewBoard,
+            isShowingCompletionMessage: isShowingCompletionMessage,
             isGameOver: store.isGameOver,
             sparkleTriggerCount: sparkleTriggerCount
         )
@@ -207,7 +241,22 @@ struct SudokuBoardView: View {
         if isComplete && !wasComplete {
             store.awardCompletionLife()
             triggerSparkle()
+            showCompletionMessageThenPrompt()
         }
         wasComplete = isComplete
+    }
+
+    private func showCompletionMessageThenPrompt() {
+        isShowingCompletionMessage = true
+        recordUITestState()
+
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_700_000_000)
+            guard store.game.isComplete, !store.isGameOver else { return }
+
+            isShowingCompletionMessage = false
+            isConfirmingNewBoard = true
+            recordUITestState()
+        }
     }
 }
