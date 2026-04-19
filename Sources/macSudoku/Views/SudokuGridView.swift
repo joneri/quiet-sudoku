@@ -35,6 +35,7 @@ struct SudokuGridView: View {
             }
             .frame(width: side, height: side)
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay(SudokuProgressionLightsView(progression: game.progression))
             .overlay(SudokuGridLinesView())
             .overlay(completionGlow)
         }
@@ -62,4 +63,3 @@ struct SudokuGridView: View {
             || (lhsRow / 3 == rhsRow / 3 && lhsColumn / 3 == rhsColumn / 3)
     }
 }
-

@@ -44,6 +44,8 @@ enum UITestProbe {
         let payload: [String: Any] = [
             "selected": selected,
             "boardSize": snapshot.boardSize.rawValue,
+            "completedBlocks": Array(snapshot.progression.completedBlocks).sorted(),
+            "completedDigits": Array(snapshot.progression.completedDigits).sorted(),
             "isConfirmingNewBoard": isConfirmingNewBoard,
             "puzzleSignature": snapshot.puzzle.puzzle.flatMap { $0 }.map(String.init).joined(separator: ","),
             "cells": cells
