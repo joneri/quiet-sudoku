@@ -1,6 +1,6 @@
 import Foundation
 
-enum BoardSize: String, CaseIterable {
+enum BoardSize: String, CaseIterable, Codable {
     case small
     case medium
     case large
@@ -48,4 +48,3 @@ enum BoardSize: String, CaseIterable {
         rawValue
     }
 }
-

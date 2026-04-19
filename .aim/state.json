@@ -13,6 +13,11 @@
       "id": "ARCH-001",
       "title": "Architecture rule and board view decomposition",
       "status": "accepted"
+    },
+    {
+      "id": "ARCH-002",
+      "title": "Persistent generated games",
+      "status": "accepted"
     }
   ]
 }

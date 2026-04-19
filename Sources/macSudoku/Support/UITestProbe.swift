@@ -7,11 +7,11 @@ enum UITestProbe {
         statePath != nil
     }
 
-    static func record(game: SudokuGame, selectedCellID: SudokuGame.Cell.ID?, boardSize: BoardSize) {
+    static func record(snapshot: SudokuSessionSnapshot, isConfirmingNewBoard: Bool) {
         guard let statePath else { return }
 
         let selected: [String: Any]
-        if let selectedCellID {
+        if let selectedCellID = snapshot.selectedCellID {
             selected = [
                 "id": selectedCellID,
                 "row": selectedCellID / 9,
@@ -25,20 +25,27 @@ enum UITestProbe {
             ]
         }
 
-        let cells = game.cells.map { cell -> [String: Any] in
-            [
-                "row": cell.row,
-                "column": cell.column,
-                "given": cell.given ?? NSNull(),
-                "value": cell.value ?? NSNull(),
-                "displayValue": cell.displayValue ?? NSNull()
-            ]
+        let cells = snapshot.puzzle.puzzle.enumerated().flatMap { row, puzzleRow in
+            puzzleRow.enumerated().map { column, given -> [String: Any] in
+                let index = row * 9 + column
+                let value = snapshot.values[index]
+                let displayValue: Any = given == 0 ? (value.map { $0 as Any } ?? NSNull()) : given
+
+                return [
+                    "row": row,
+                    "column": column,
+                    "given": given == 0 ? NSNull() : given,
+                    "value": value ?? NSNull(),
+                    "displayValue": displayValue
+                ]
+            }
         }
 
         let payload: [String: Any] = [
             "selected": selected,
-            "boardSize": boardSize.rawValue,
-            "isComplete": game.isComplete,
+            "boardSize": snapshot.boardSize.rawValue,
+            "isConfirmingNewBoard": isConfirmingNewBoard,
+            "puzzleSignature": snapshot.puzzle.puzzle.flatMap { $0 }.map(String.init).joined(separator: ","),
             "cells": cells
         ]
 

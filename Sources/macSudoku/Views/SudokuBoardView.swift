@@ -1,9 +1,12 @@
 import SwiftUI
 
 struct SudokuBoardView: View {
-    @State var game: SudokuGame
-    @State private var selectedCell: SudokuGame.Cell.ID?
-    @State private var boardSize: BoardSize = .large
+    @State private var store: SudokuSessionStore
+    @State private var isConfirmingNewBoard = false
+
+    init(store: SudokuSessionStore = SudokuSessionStore()) {
+        _store = State(initialValue: store)
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -12,33 +15,49 @@ struct SudokuBoardView: View {
 
                 VStack(spacing: 0) {
                     SudokuTopBarView(
-                        boardSize: boardSize,
-                        onCycleBoardSize: cycleBoardSize
+                        boardSize: store.boardSize,
+                        onCycleBoardSize: cycleBoardSize,
+                        onRequestNewBoard: requestNewBoard
                     )
 
                     SudokuGridView(
-                        game: game,
-                        selectedCell: selectedCell,
+                        game: store.game,
+                        selectedCell: store.selectedCell,
                         onSelectCell: selectCell
                     )
-                    .frame(width: boardSize.boardSide, height: boardSize.boardSide)
+                    .frame(width: store.boardSize.boardSide, height: store.boardSize.boardSide)
+                }
+
+                if isConfirmingNewBoard {
+                    Color.black.opacity(0.10)
+                        .ignoresSafeArea()
+
+                    NewBoardConfirmationView(
+                        onConfirm: confirmNewBoard,
+                        onCancel: cancelNewBoard
+                    )
+                    .transition(.scale(scale: 0.96).combined(with: .opacity))
                 }
             }
         }
-        .frame(width: boardSize.boardSide, height: boardSize.windowHeight)
+        .frame(width: store.boardSize.boardSide, height: store.boardSize.windowHeight)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .contentShape(Rectangle())
         .aspectRatio(nil, contentMode: .fit)
         .background {
             KeyboardInputBridge { input in
-                handleKeyboardInput(input)
+                let handled = store.handleKeyboardInput(input)
+                if handled {
+                    recordUITestState()
+                }
+                return handled
             }
         }
         .onAppear {
-            selectedCell = selectedCell ?? game.cells.first(where: { !$0.isGiven })?.id
             recordUITestState()
         }
-        .animation(.snappy(duration: 0.24), value: boardSize)
+        .animation(.snappy(duration: 0.24), value: store.boardSize)
+        .animation(.snappy(duration: 0.18), value: isConfirmingNewBoard)
     }
 
     private var boardBackground: some View {
@@ -86,47 +105,32 @@ struct SudokuBoardView: View {
     }
 
     private func cycleBoardSize() {
-        boardSize = boardSize.next
+        store.cycleBoardSize()
         recordUITestState()
     }
 
     private func selectCell(_ cellID: SudokuGame.Cell.ID) {
-        selectedCell = cellID
+        store.selectCell(cellID)
         recordUITestState()
     }
 
-    private func handleKeyboardInput(_ input: SudokuKeyboardInput) -> Bool {
-        guard let selectedCell else {
-            return false
-        }
-
-        let row = selectedCell / 9
-        let column = selectedCell % 9
-
-        switch input {
-        case .digit(let value):
-            game.setValue(value, row: row, column: column)
-            recordUITestState()
-            return true
-        case .clear:
-            game.setValue(nil, row: row, column: column)
-            recordUITestState()
-            return true
-        case .move(let rowDelta, let columnDelta):
-            moveSelection(rowDelta: rowDelta, columnDelta: columnDelta)
-            recordUITestState()
-            return true
-        }
+    private func requestNewBoard() {
+        isConfirmingNewBoard = true
+        recordUITestState()
     }
 
-    private func moveSelection(rowDelta: Int, columnDelta: Int) {
-        let current = selectedCell ?? 0
-        let row = max(0, min(8, current / 9 + rowDelta))
-        let column = max(0, min(8, current % 9 + columnDelta))
-        selectedCell = row * 9 + column
+    private func confirmNewBoard() {
+        isConfirmingNewBoard = false
+        store.generateNewBoard()
+        recordUITestState()
+    }
+
+    private func cancelNewBoard() {
+        isConfirmingNewBoard = false
+        recordUITestState()
     }
 
     private func recordUITestState() {
-        UITestProbe.record(game: game, selectedCellID: selectedCell, boardSize: boardSize)
+        UITestProbe.record(snapshot: store.snapshot(), isConfirmingNewBoard: isConfirmingNewBoard)
     }
 }

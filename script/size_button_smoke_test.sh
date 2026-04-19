@@ -5,10 +5,12 @@ APP_NAME="macSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
 STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-size-state.XXXXXX.json")"
+SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-size-save.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true
   rm -f "$STATE_FILE"
+  rm -f "$SAVE_FILE"
 }
 trap cleanup EXIT
 
@@ -17,6 +19,7 @@ pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
 /usr/bin/open -n \
   --env "MACSUDOKU_UI_STATE_PATH=$STATE_FILE" \
+  --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
   "$APP_BUNDLE"
 
 wait_for_state() {

@@ -14,14 +14,29 @@ final class SudokuGame {
     }
 
     private(set) var cells: [Cell]
-    private let solution: [[Int]]
+    let puzzle: SudokuPuzzle
 
     init(puzzle: [[Int]], solution: [[Int]]) {
-        self.solution = solution
+        self.puzzle = SudokuPuzzle(puzzle: puzzle, solution: solution)
         cells = puzzle.enumerated().flatMap { rowIndex, row in
             row.enumerated().map { columnIndex, number in
                 let given = number == 0 ? nil : number
                 return Cell(row: rowIndex, column: columnIndex, given: given, value: nil)
+            }
+        }
+    }
+
+    convenience init(puzzle: SudokuPuzzle) {
+        self.init(puzzle: puzzle.puzzle, solution: puzzle.solution)
+    }
+
+    convenience init?(snapshot: SudokuSessionSnapshot) {
+        guard snapshot.values.count == 81 else { return nil }
+        self.init(puzzle: snapshot.puzzle)
+
+        for index in snapshot.values.indices {
+            if !cells[index].isGiven {
+                cells[index].value = snapshot.values[index]
             }
         }
     }
@@ -60,7 +75,15 @@ final class SudokuGame {
     var isComplete: Bool {
         cells.allSatisfy { $0.displayValue != nil }
             && !cells.contains { hasConflict(at: $0.row, column: $0.column) }
-            && cells.allSatisfy { $0.displayValue == solution[$0.row][$0.column] }
+            && cells.allSatisfy { $0.displayValue == puzzle.solution[$0.row][$0.column] }
+    }
+
+    var firstEditableCellID: Cell.ID? {
+        cells.first(where: { !$0.isGiven })?.id
+    }
+
+    var values: [Int?] {
+        cells.map(\.value)
     }
 
     private func peers(for row: Int, column: Int) -> [Cell] {
@@ -74,29 +97,6 @@ final class SudokuGame {
 
 extension SudokuGame {
     static var sample: SudokuGame {
-        SudokuGame(
-            puzzle: [
-                [0, 0, 6, 0, 0, 0, 1, 0, 0],
-                [0, 7, 0, 0, 6, 0, 0, 3, 0],
-                [8, 0, 0, 3, 0, 4, 0, 0, 6],
-                [0, 0, 8, 6, 0, 7, 4, 0, 0],
-                [0, 6, 0, 0, 0, 0, 0, 1, 0],
-                [0, 0, 2, 1, 0, 9, 5, 0, 0],
-                [5, 0, 0, 7, 0, 2, 0, 0, 3],
-                [0, 4, 0, 0, 9, 0, 0, 8, 0],
-                [0, 0, 7, 0, 0, 0, 9, 0, 0]
-            ],
-            solution: [
-                [3, 2, 6, 9, 5, 8, 1, 7, 4],
-                [4, 7, 5, 2, 6, 1, 8, 3, 9],
-                [8, 1, 9, 3, 7, 4, 2, 5, 6],
-                [1, 5, 8, 6, 3, 7, 4, 9, 2],
-                [9, 6, 4, 8, 2, 5, 3, 1, 7],
-                [7, 3, 2, 1, 4, 9, 5, 6, 8],
-                [5, 9, 1, 7, 8, 2, 6, 4, 3],
-                [2, 4, 3, 5, 9, 6, 7, 8, 1],
-                [6, 8, 7, 4, 1, 3, 9, 2, 5]
-            ]
-        )
+        SudokuGame(puzzle: SudokuPuzzleGenerator().generate())
     }
 }

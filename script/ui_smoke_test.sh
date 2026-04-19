@@ -7,10 +7,12 @@ BUNDLE_ID="dev.jonaseriksson.macSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
 STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-ui-state.XXXXXX.json")"
+SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-ui-save.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true
   rm -f "$STATE_FILE"
+  rm -f "$SAVE_FILE"
 }
 trap cleanup EXIT
 
@@ -19,6 +21,7 @@ pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
 /usr/bin/open -n \
   --env "MACSUDOKU_UI_STATE_PATH=$STATE_FILE" \
+  --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
   "$APP_BUNDLE"
 
 wait_for_state() {
@@ -57,6 +60,22 @@ PY
   echo "State file: $STATE_FILE" >&2
   [[ -f "$STATE_FILE" ]] && cat "$STATE_FILE" >&2
   exit 1
+}
+
+state_value() {
+  local expression="$1"
+  /usr/bin/python3 - "$STATE_FILE" "$expression" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    state = json.load(handle)
+
+def editable_cells():
+    return [cell for cell in state["cells"] if cell["given"] is None]
+
+print(eval(sys.argv[2], {"__builtins__": {}}, {"state": state, "editable_cells": editable_cells}))
+PY
 }
 
 send_keycode() {
@@ -153,16 +172,38 @@ SWIFT
 }
 
 wait_for_state 'state["boardSize"] == "large"' "initial large board size"
-wait_for_state 'state["selected"]["row"] == 0 and state["selected"]["column"] == 0' "initial selection at row 0 column 0"
-send_keycode 21
-wait_for_state 'cell(0, 0)["value"] == 4' "typing 4 into row 0 column 0"
-send_keycode 124
-wait_for_state 'state["selected"]["row"] == 0 and state["selected"]["column"] == 1' "right arrow moves to row 0 column 1"
-send_keycode 25
-wait_for_state 'cell(0, 1)["value"] == 9' "typing 9 into row 0 column 1"
-click_cell 1 0
-wait_for_state 'state["selected"]["row"] == 1 and state["selected"]["column"] == 0' "mouse click selects row 1 column 0"
-send_keycode 18
-wait_for_state 'cell(1, 0)["value"] == 1' "typing 1 into mouse-selected row 1 column 0"
+first_cell="$(state_value '"{} {}".format(editable_cells()[0]["row"], editable_cells()[0]["column"])')"
+first_row="${first_cell%% *}"
+first_column="${first_cell##* }"
 
-echo "UI smoke test passed: keyboard entry, mouse selection, and selection movement work."
+click_cell "$first_row" "$first_column"
+wait_for_state "state[\"selected\"][\"row\"] == $first_row and state[\"selected\"][\"column\"] == $first_column" "mouse click selects first editable cell"
+send_keycode 21
+wait_for_state 'cell('"$first_row"', '"$first_column"')["value"] == 4' "typing 4 into first editable cell"
+send_keycode 124
+next_column=$((first_column + 1))
+if [[ "$next_column" -le 8 ]]; then
+  wait_for_state "state[\"selected\"][\"row\"] == $first_row and state[\"selected\"][\"column\"] == $next_column" "right arrow moves selection one column right"
+fi
+
+second_cell="$(state_value '"{} {}".format(editable_cells()[1]["row"], editable_cells()[1]["column"])')"
+second_row="${second_cell%% *}"
+second_column="${second_cell##* }"
+
+click_cell "$second_row" "$second_column"
+wait_for_state "state[\"selected\"][\"row\"] == $second_row and state[\"selected\"][\"column\"] == $second_column" "mouse click selects second editable cell"
+send_keycode 25
+wait_for_state 'cell('"$second_row"', '"$second_column"')["value"] == 9' "typing 9 into second editable cell"
+
+pkill -x "$APP_NAME" >/dev/null 2>&1 || true
+rm -f "$STATE_FILE"
+touch "$STATE_FILE"
+
+/usr/bin/open -n \
+  --env "MACSUDOKU_UI_STATE_PATH=$STATE_FILE" \
+  --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
+  "$APP_BUNDLE"
+
+wait_for_state 'cell('"$first_row"', '"$first_column"')["value"] == 4 and cell('"$second_row"', '"$second_column"')["value"] == 9' "saved numbers restore after relaunch"
+
+echo "UI smoke test passed: keyboard entry, mouse selection, relaunch restore, and selection movement work."

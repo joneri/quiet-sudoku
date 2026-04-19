@@ -7,7 +7,7 @@ struct macSudokuApp: App {
 
     var body: some Scene {
         WindowGroup("Sudoku") {
-            SudokuBoardView(game: SudokuGame.sample)
+            SudokuBoardView()
                 .background(FloatingWindowConfigurator())
                 .toolbarVisibility(.hidden, for: .windowToolbar)
                 .containerBackground(.thinMaterial, for: .window)
