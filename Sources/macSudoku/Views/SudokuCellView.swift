@@ -14,8 +14,8 @@ struct SudokuCellView: View {
 
             if let value = cell.displayValue {
                 Text("\(value)")
-                    .font(.system(size: 30, weight: cell.isGiven ? .semibold : .medium, design: .rounded))
-                    .minimumScaleFactor(0.45)
+                    .font(.system(size: 28, weight: cell.isGiven ? .semibold : .medium, design: .rounded))
+                    .minimumScaleFactor(0.32)
                     .foregroundStyle(foregroundStyle)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -25,7 +25,7 @@ struct SudokuCellView: View {
             if isSelected {
                 RoundedRectangle(cornerRadius: 5, style: .continuous)
                     .stroke(Color.green.opacity(0.9), lineWidth: 3)
-                    .padding(3)
+                    .padding(2)
             }
         }
     }

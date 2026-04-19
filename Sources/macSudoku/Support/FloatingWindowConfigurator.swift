@@ -22,17 +22,18 @@ struct FloatingWindowConfigurator: NSViewRepresentable {
         guard let window else { return }
 
         window.level = .floating
-        window.isMovableByWindowBackground = true
+        window.isMovableByWindowBackground = false
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
         window.backgroundColor = .clear
         window.isOpaque = false
         window.hasShadow = true
         window.alphaValue = 0.98
+        window.styleMask.remove(.resizable)
+        window.styleMask.insert(.fullSizeContentView)
         window.collectionBehavior.insert([.canJoinAllSpaces, .fullScreenAuxiliary])
         window.standardWindowButton(.closeButton)?.isHidden = true
         window.standardWindowButton(.miniaturizeButton)?.isHidden = true
         window.standardWindowButton(.zoomButton)?.isHidden = true
-        window.styleMask.insert(.fullSizeContentView)
     }
 }

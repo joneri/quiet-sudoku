@@ -1,6 +1,6 @@
 # Epic
 
-Build a super simple macOS Sudoku app that feels like a floating, non-disruptive window above everything else.
+Make macSudoku impressively well structured, reusable, and componentized so future Swift developers can understand, extend, and trust the codebase.
 
-The product should be Sudoku from edge to edge: no visible in-window menus, toolbars, or extra buttons. It should feel smooth, simple, and polished for the latest macOS with glass/material effects.
+Every future increment in this repository should treat reusable and readable Swift code as an acceptance criterion. Start now by finding structural issues early and refactoring them while preserving current app behavior.
 

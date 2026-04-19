@@ -3,30 +3,15 @@
   "mode": "Auto",
   "cost_profile": "Standard",
   "epic": {
-    "title": "Floating edge-to-edge macOS Sudoku",
+    "title": "Reusable and impressive Swift architecture",
     "status": "final_review"
   },
   "current_role": "Reviewer",
   "current_gate": "E",
   "increments": [
     {
-      "id": "DI-001",
-      "title": "Playable floating Sudoku window",
-      "status": "accepted"
-    },
-    {
-      "id": "DI-002",
-      "title": "Quiet validation and completion feedback",
-      "status": "accepted"
-    },
-    {
-      "id": "DI-003",
-      "title": "Polished floating glass surface",
-      "status": "accepted"
-    },
-    {
-      "id": "DI-004",
-      "title": "Reliable board keyboard input",
+      "id": "ARCH-001",
+      "title": "Architecture rule and board view decomposition",
       "status": "accepted"
     }
   ]

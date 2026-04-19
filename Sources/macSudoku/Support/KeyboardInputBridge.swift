@@ -13,18 +13,23 @@ struct KeyboardInputBridge: NSViewRepresentable {
     func makeNSView(context: Context) -> KeyboardInputView {
         let view = KeyboardInputView()
         view.onInput = onInput
-        view.requestFocus()
+        view.installMonitorIfNeeded()
         return view
     }
 
     func updateNSView(_ nsView: KeyboardInputView, context: Context) {
         nsView.onInput = onInput
-        nsView.requestFocus()
+        nsView.installMonitorIfNeeded()
+    }
+
+    static func dismantleNSView(_ nsView: KeyboardInputView, coordinator: ()) {
+        nsView.invalidateMonitor()
     }
 }
 
 final class KeyboardInputView: NSView {
     var onInput: ((SudokuKeyboardInput) -> Bool)?
+    private var monitor: Any?
 
     override var acceptsFirstResponder: Bool {
         true
@@ -33,6 +38,24 @@ final class KeyboardInputView: NSView {
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         requestFocus()
+    }
+
+    func installMonitorIfNeeded() {
+        guard monitor == nil else { return }
+
+        monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self, let input = self.input(from: event), self.onInput?(input) == true else {
+                return event
+            }
+
+            return nil
+        }
+    }
+
+    func invalidateMonitor() {
+        guard let monitor else { return }
+        NSEvent.removeMonitor(monitor)
+        self.monitor = nil
     }
 
     func requestFocus() {
@@ -79,4 +102,3 @@ final class KeyboardInputView: NSView {
         return nil
     }
 }
-

@@ -8,7 +8,6 @@ struct macSudokuApp: App {
     var body: some Scene {
         WindowGroup("Sudoku") {
             SudokuBoardView(game: SudokuGame.sample)
-                .frame(minWidth: 380, idealWidth: 540, maxWidth: 740, minHeight: 380, idealHeight: 540, maxHeight: 740)
                 .background(FloatingWindowConfigurator())
                 .toolbarVisibility(.hidden, for: .windowToolbar)
                 .containerBackground(.thinMaterial, for: .window)
@@ -18,8 +17,9 @@ struct macSudokuApp: App {
         .defaultWindowPlacement { content, context in
             let ideal = content.sizeThatFits(.unspecified)
             let visible = context.defaultDisplay.visibleRect
-            let side = min(max(ideal.width, ideal.height, 540), min(visible.width, visible.height) * 0.70)
-            return WindowPlacement(size: CGSize(width: side, height: side))
+            let width = min(ideal.width, visible.width * 0.70)
+            let height = min(ideal.height, visible.height * 0.70)
+            return WindowPlacement(size: CGSize(width: width, height: height))
         }
         .commands {
             CommandGroup(replacing: .newItem) {}
