@@ -9,7 +9,8 @@ struct SudokuProgressionLightsView: View {
             let cell = side / 9
 
             ZStack {
-                digitEdgeLights(cell: cell, side: side)
+                rowLights(cell: cell, side: side)
+                columnLights(cell: cell, side: side)
                 blockGlows(cell: cell)
             }
             .frame(width: side, height: side)
@@ -17,19 +18,45 @@ struct SudokuProgressionLightsView: View {
         .allowsHitTesting(false)
     }
 
-    private func digitEdgeLights(cell: CGFloat, side: CGFloat) -> some View {
+    private func rowLights(cell: CGFloat, side: CGFloat) -> some View {
         ZStack {
-            ForEach(1...9, id: \.self) { digit in
-                if progression.completedDigits.contains(digit) {
-                    digitLight(for: digit, cell: cell, side: side)
+            ForEach(0..<9, id: \.self) { row in
+                if progression.completedRows.contains(row) {
+                    rowLight(for: row, cell: cell, side: side)
                 }
             }
         }
     }
 
-    private func digitLight(for digit: Int, cell: CGFloat, side: CGFloat) -> some View {
-        let index = CGFloat(digit - 1)
-        let x = cell * index + cell / 2
+    private func rowLight(for row: Int, cell: CGFloat, side: CGFloat) -> some View {
+        let y = cell * CGFloat(row) + cell / 2
+
+        return ZStack {
+            Capsule()
+                .fill(Color.green.opacity(0.82))
+                .frame(width: 5, height: max(cell * 0.46, 12))
+                .position(x: 3, y: y)
+
+            Capsule()
+                .fill(Color.green.opacity(0.82))
+                .frame(width: 5, height: max(cell * 0.46, 12))
+                .position(x: side - 3, y: y)
+        }
+        .shadow(color: Color.green.opacity(0.65), radius: 9)
+    }
+
+    private func columnLights(cell: CGFloat, side: CGFloat) -> some View {
+        ZStack {
+            ForEach(0..<9, id: \.self) { column in
+                if progression.completedColumns.contains(column) {
+                    columnLight(for: column, cell: cell, side: side)
+                }
+            }
+        }
+    }
+
+    private func columnLight(for column: Int, cell: CGFloat, side: CGFloat) -> some View {
+        let x = cell * CGFloat(column) + cell / 2
 
         return ZStack {
             Capsule()
@@ -74,4 +101,3 @@ struct SudokuProgressionLightsView: View {
             )
     }
 }
-

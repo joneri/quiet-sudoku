@@ -37,7 +37,7 @@ values = []
 for row in range(9):
     for column in range(9):
         value = solution[row][column]
-        if value == 3 or (row < 3 and column < 3):
+        if value == 3 or row == 0 or column == 0 or (row < 3 and column < 3):
             values.append(value)
         else:
             values.append(None)
@@ -71,11 +71,15 @@ with open(sys.argv[1], "r", encoding="utf-8") as handle:
 
 assert 3 in state["completedDigits"]
 assert 0 in state["completedBlocks"]
+assert 0 in state["completedRows"]
+assert 0 in state["completedColumns"]
 assert 1 not in state["completedDigits"]
 assert 1 not in state["completedBlocks"]
+assert 1 not in state["completedRows"]
+assert 1 not in state["completedColumns"]
 PY
   then
-    echo "Progression smoke test passed: completed digit and block are detected."
+    echo "Progression smoke test passed: completed digit, block, row, and column are detected."
     exit 0
   fi
 
@@ -85,4 +89,3 @@ done
 echo "Progression smoke test failed." >&2
 [[ -f "$STATE_FILE" ]] && cat "$STATE_FILE" >&2
 exit 1
-

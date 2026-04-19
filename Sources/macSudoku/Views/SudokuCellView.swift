@@ -6,6 +6,7 @@ struct SudokuCellView: View {
     let isPeer: Bool
     let isMatched: Bool
     let hasConflict: Bool
+    let isDigitComplete: Bool
 
     var body: some View {
         ZStack {
@@ -18,6 +19,7 @@ struct SudokuCellView: View {
                     .minimumScaleFactor(0.32)
                     .foregroundStyle(foregroundStyle)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .shadow(color: digitGlowColor, radius: isDigitComplete ? 11 : 0)
             }
         }
         .aspectRatio(1, contentMode: .fit)
@@ -56,5 +58,9 @@ struct SudokuCellView: View {
         }
 
         return cell.isGiven ? Color.primary : Color.cyan.opacity(0.95)
+    }
+
+    private var digitGlowColor: Color {
+        hasConflict ? .clear : Color.green.opacity(0.75)
     }
 }

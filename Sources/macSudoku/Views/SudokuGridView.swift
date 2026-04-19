@@ -4,6 +4,9 @@ struct SudokuGridView: View {
     let game: SudokuGame
     let selectedCell: SudokuGame.Cell.ID?
     let onSelectCell: (SudokuGame.Cell.ID) -> Void
+    private var progression: SudokuProgression {
+        game.progression
+    }
 
     var body: some View {
         GeometryReader { proxy in
@@ -23,7 +26,8 @@ struct SudokuGridView: View {
                                     isSelected: selectedCell == cell.id,
                                     isPeer: selectedCell.map { isPeer(cell.id, $0) } ?? false,
                                     isMatched: game.isMatchingSelectedValue(cell, selectedCellID: selectedCell),
-                                    hasConflict: game.hasConflict(at: row, column: column)
+                                    hasConflict: game.hasConflict(at: row, column: column),
+                                    isDigitComplete: cell.displayValue.map { progression.completedDigits.contains($0) } ?? false
                                 )
                             }
                             .buttonStyle(.plain)
@@ -35,7 +39,7 @@ struct SudokuGridView: View {
             }
             .frame(width: side, height: side)
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(SudokuProgressionLightsView(progression: game.progression))
+            .overlay(SudokuProgressionLightsView(progression: progression))
             .overlay(SudokuGridLinesView())
             .overlay(completionGlow)
         }

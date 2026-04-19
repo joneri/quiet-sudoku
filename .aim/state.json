@@ -3,20 +3,20 @@
   "mode": "Auto",
   "cost_profile": "Standard",
   "epic": {
-    "title": "Reusable and impressive Swift architecture",
+    "title": "Progression lights for completed digits and blocks",
     "status": "final_review"
   },
   "current_role": "Reviewer",
   "current_gate": "E",
   "increments": [
     {
-      "id": "ARCH-001",
-      "title": "Architecture rule and board view decomposition",
+      "id": "PROG-001",
+      "title": "Digit and block completion lights",
       "status": "accepted"
     },
     {
-      "id": "ARCH-002",
-      "title": "Persistent generated games",
+      "id": "PROG-002",
+      "title": "Digit glows and row-column edge lights",
       "status": "accepted"
     }
   ]

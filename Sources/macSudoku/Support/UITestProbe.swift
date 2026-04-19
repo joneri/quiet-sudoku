@@ -45,7 +45,9 @@ enum UITestProbe {
             "selected": selected,
             "boardSize": snapshot.boardSize.rawValue,
             "completedBlocks": Array(snapshot.progression.completedBlocks).sorted(),
+            "completedColumns": Array(snapshot.progression.completedColumns).sorted(),
             "completedDigits": Array(snapshot.progression.completedDigits).sorted(),
+            "completedRows": Array(snapshot.progression.completedRows).sorted(),
             "isConfirmingNewBoard": isConfirmingNewBoard,
             "puzzleSignature": snapshot.puzzle.puzzle.flatMap { $0 }.map(String.init).joined(separator: ","),
             "cells": cells

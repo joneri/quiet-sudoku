@@ -1,6 +1,6 @@
 # Epic
 
-Make macSudoku impressively well structured, reusable, and componentized so future Swift developers can understand, extend, and trust the codebase.
+Add satisfying Sudoku progression feedback while keeping the code structured, reusable, componentized, and tested.
 
-Every future increment in this repository should treat reusable and readable Swift code as an acceptance criterion. Start now by finding structural issues early and refactoring them while preserving current app behavior.
+When all instances of a digit are correctly identified and no instances of that digit are conflicted, green edge lights should turn on. When a 3x3 block contains all digits correctly, that block should get a soft green glow.
 

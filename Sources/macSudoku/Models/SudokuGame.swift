@@ -89,7 +89,9 @@ final class SudokuGame {
     var progression: SudokuProgression {
         SudokuProgression(
             completedDigits: Set((1...9).filter(isDigitComplete(_:))),
-            completedBlocks: Set((0..<9).filter(isBlockComplete(_:)))
+            completedBlocks: Set((0..<9).filter(isBlockComplete(_:))),
+            completedRows: Set((0..<9).filter(isRowComplete(_:))),
+            completedColumns: Set((0..<9).filter(isColumnComplete(_:)))
         )
     }
 
@@ -116,6 +118,24 @@ final class SudokuGame {
             return value == puzzle.solution[cell.row][cell.column]
                 && !hasConflict(at: cell.row, column: cell.column)
         }
+    }
+
+    private func isRowComplete(_ row: Int) -> Bool {
+        cells
+            .filter { $0.row == row }
+            .allSatisfy(isCellCorrectAndConflictFree(_:))
+    }
+
+    private func isColumnComplete(_ column: Int) -> Bool {
+        cells
+            .filter { $0.column == column }
+            .allSatisfy(isCellCorrectAndConflictFree(_:))
+    }
+
+    private func isCellCorrectAndConflictFree(_ cell: Cell) -> Bool {
+        guard let value = cell.displayValue else { return false }
+        return value == puzzle.solution[cell.row][cell.column]
+            && !hasConflict(at: cell.row, column: cell.column)
     }
 
     private func peers(for row: Int, column: Int) -> [Cell] {

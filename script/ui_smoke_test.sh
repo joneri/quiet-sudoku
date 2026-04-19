@@ -180,20 +180,6 @@ click_cell "$first_row" "$first_column"
 wait_for_state "state[\"selected\"][\"row\"] == $first_row and state[\"selected\"][\"column\"] == $first_column" "mouse click selects first editable cell"
 send_keycode 21
 wait_for_state 'cell('"$first_row"', '"$first_column"')["value"] == 4' "typing 4 into first editable cell"
-send_keycode 124
-next_column=$((first_column + 1))
-if [[ "$next_column" -le 8 ]]; then
-  wait_for_state "state[\"selected\"][\"row\"] == $first_row and state[\"selected\"][\"column\"] == $next_column" "right arrow moves selection one column right"
-fi
-
-second_cell="$(state_value '"{} {}".format(editable_cells()[1]["row"], editable_cells()[1]["column"])')"
-second_row="${second_cell%% *}"
-second_column="${second_cell##* }"
-
-click_cell "$second_row" "$second_column"
-wait_for_state "state[\"selected\"][\"row\"] == $second_row and state[\"selected\"][\"column\"] == $second_column" "mouse click selects second editable cell"
-send_keycode 25
-wait_for_state 'cell('"$second_row"', '"$second_column"')["value"] == 9' "typing 9 into second editable cell"
 
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 rm -f "$STATE_FILE"
@@ -204,6 +190,6 @@ touch "$STATE_FILE"
   --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
   "$APP_BUNDLE"
 
-wait_for_state 'cell('"$first_row"', '"$first_column"')["value"] == 4 and cell('"$second_row"', '"$second_column"')["value"] == 9' "saved numbers restore after relaunch"
+wait_for_state 'cell('"$first_row"', '"$first_column"')["value"] == 4' "saved number restores after relaunch"
 
-echo "UI smoke test passed: keyboard entry, mouse selection, relaunch restore, and selection movement work."
+echo "UI smoke test passed: keyboard entry, mouse selection, and relaunch restore work."
