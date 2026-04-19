@@ -106,6 +106,7 @@ enum UITestProbe {
             "maximumLives": SudokuSessionStore.maximumLives,
             "puzzleSignature": snapshot.puzzle.puzzle.flatMap { $0 }.map(String.init).joined(separator: ","),
             "sparkleTriggerCount": sparkleTriggerCount,
+            "topBarMetrics": SudokuTopBarView.metricsSnapshot(width: snapshot.boardSize.boardSide),
             "visibleHeartSlots": max(SudokuSessionStore.maximumLives, snapshot.livesRemaining),
             "cells": cells
         ]

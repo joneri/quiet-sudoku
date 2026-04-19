@@ -121,10 +121,10 @@ guard result == .success else {
 SWIFT
 }
 
-wait_for_state 'state["boardSize"] == "large" and state["visibleHeartSlots"] == 5 and state["maximumLives"] == 5' "initial large board size with five heart slots"
+wait_for_state 'state["boardSize"] == "large" and state["visibleHeartSlots"] == 5 and state["maximumLives"] == 5 and state["topBarMetrics"]["minimumRequiredWidth"] <= 700' "initial large board size with five heart slots"
 press_size_button
-wait_for_state 'state["boardSize"] == "small" and state["visibleHeartSlots"] == 5 and state["maximumLives"] == 5' "button cycles large to small with five heart slots"
+wait_for_state 'state["boardSize"] == "small" and state["visibleHeartSlots"] == 5 and state["maximumLives"] == 5 and state["topBarMetrics"]["minimumRequiredWidth"] <= 320 and state["topBarMetrics"]["usesCompactLevelTitle"] == True and state["topBarMetrics"]["usesCompactScoresTitle"] == True' "button cycles large to small with five heart slots"
 press_size_button
-wait_for_state 'state["boardSize"] == "medium" and state["visibleHeartSlots"] == 5 and state["maximumLives"] == 5' "button cycles small to medium with five heart slots"
+wait_for_state 'state["boardSize"] == "medium" and state["visibleHeartSlots"] == 5 and state["maximumLives"] == 5 and state["topBarMetrics"]["minimumRequiredWidth"] <= 520 and state["topBarMetrics"]["usesCompactLevelTitle"] == True and state["topBarMetrics"]["usesCompactScoresTitle"] == True' "button cycles small to medium with five heart slots and fitting controls"
 
-echo "Size button smoke test passed: large -> small -> medium with five heart slots reserved."
+echo "Size button smoke test passed: large -> small -> medium with five heart slots and fitting top bar controls."

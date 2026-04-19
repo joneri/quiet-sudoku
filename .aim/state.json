@@ -4,10 +4,10 @@
   "cost_profile": "Cost Control",
   "epic": {
     "title": "Levels and local leaderboard",
-    "status": "final_review"
+    "status": "closed"
   },
   "current_role": "PO",
-  "current_gate": "E",
+  "current_gate": "closed",
   "increments": [
     {
       "id": "LEVEL-001",
@@ -22,6 +22,11 @@
     {
       "id": "LEVEL-003",
       "title": "Level difficulty ramp verification",
+      "status": "accepted"
+    },
+    {
+      "id": "LEVEL-004",
+      "title": "Medium top-shelf layout fit",
       "status": "accepted"
     }
   ]

@@ -76,7 +76,7 @@ struct SudokuTopBarView: View {
     }
 
     private func levelBadge(metrics: TopBarMetrics) -> some View {
-        Text(metrics.isCompact ? level.compactTitle : level.displayTitle)
+        Text(metrics.usesCompactLevelTitle ? level.compactTitle : level.displayTitle)
             .font(.system(size: metrics.buttonFontSize, weight: .semibold, design: .rounded))
             .monospacedDigit()
             .foregroundStyle(Color.green.opacity(0.92))
@@ -103,7 +103,7 @@ struct SudokuTopBarView: View {
 
     private func leaderboardButton(metrics: TopBarMetrics) -> some View {
         Button(action: onShowLeaderboard) {
-            Text(metrics.isCompact ? "Top" : "Scores")
+            Text(metrics.usesCompactScoresTitle ? "Top" : "Scores")
                 .font(.system(size: metrics.buttonFontSize, weight: .medium, design: .rounded))
                 .foregroundStyle(.primary)
                 .frame(width: metrics.leaderboardButtonWidth, height: metrics.buttonHeight)
@@ -153,20 +153,40 @@ private struct TopBarMetrics {
         width < 420
     }
 
+    var isMedium: Bool {
+        (420..<620).contains(width)
+    }
+
+    var usesCompactLevelTitle: Bool {
+        isCompact || isMedium
+    }
+
+    var usesCompactScoresTitle: Bool {
+        isCompact || isMedium
+    }
+
     var horizontalPadding: CGFloat {
-        isCompact ? 5 : 12
+        if isCompact { return 5 }
+        if isMedium { return 8 }
+        return 12
     }
 
     var groupSpacing: CGFloat {
-        isCompact ? 2 : 8
+        if isCompact { return 2 }
+        if isMedium { return 4 }
+        return 8
     }
 
     var trailingButtonSpacing: CGFloat {
-        isCompact ? 3 : 8
+        if isCompact { return 3 }
+        if isMedium { return 5 }
+        return 8
     }
 
     var minimumSpacer: CGFloat {
-        isCompact ? 1 : 8
+        if isCompact { return 1 }
+        if isMedium { return 3 }
+        return 8
     }
 
     var buttonHeight: CGFloat {
@@ -174,41 +194,82 @@ private struct TopBarMetrics {
     }
 
     var buttonFontSize: CGFloat {
-        isCompact ? 11 : 13
+        if isCompact { return 11 }
+        if isMedium { return 12 }
+        return 13
     }
 
     var newButtonWidth: CGFloat {
-        isCompact ? 41 : 72
+        if isCompact { return 41 }
+        if isMedium { return 58 }
+        return 72
     }
 
     var levelBadgeWidth: CGFloat {
-        isCompact ? 30 : 70
+        if isCompact { return 30 }
+        if isMedium { return 36 }
+        return 70
     }
 
     var lockButtonWidth: CGFloat {
-        isCompact ? 50 : 82
+        if isCompact { return 50 }
+        if isMedium { return 68 }
+        return 82
     }
 
     var leaderboardButtonWidth: CGFloat {
-        isCompact ? 34 : 68
+        if isCompact { return 34 }
+        if isMedium { return 44 }
+        return 68
     }
 
     var sizeButtonWidth: CGFloat {
-        isCompact ? 45 : 88
+        if isCompact { return 45 }
+        if isMedium { return 68 }
+        return 88
     }
 
     var heartFontSize: CGFloat {
-        isCompact ? 10 : 15
+        if isCompact { return 10 }
+        if isMedium { return 13 }
+        return 15
     }
 
     var heartSpacing: CGFloat {
-        isCompact ? 2 : 5
+        if isCompact { return 2 }
+        if isMedium { return 4 }
+        return 5
     }
 
     var heartRackWidth: CGFloat {
         let heartSlots = CGFloat(SudokuSessionStore.maximumLives)
         let spacing = CGFloat(SudokuSessionStore.maximumLives - 1) * heartSpacing
-        let sidePadding: CGFloat = isCompact ? 2 : 12
+        let sidePadding: CGFloat = isCompact ? 2 : (isMedium ? 6 : 12)
         return heartSlots * heartFontSize + spacing + sidePadding
+    }
+
+    var minimumRequiredWidth: CGFloat {
+        horizontalPadding * 2
+            + newButtonWidth
+            + levelBadgeWidth
+            + heartRackWidth
+            + lockButtonWidth
+            + leaderboardButtonWidth
+            + sizeButtonWidth
+            + groupSpacing
+            + trailingButtonSpacing * 2
+            + minimumSpacer * 2
+    }
+}
+
+extension SudokuTopBarView {
+    static func metricsSnapshot(width: CGFloat) -> [String: Any] {
+        let metrics = TopBarMetrics(width: width)
+        return [
+            "heartRackWidth": metrics.heartRackWidth,
+            "minimumRequiredWidth": metrics.minimumRequiredWidth,
+            "usesCompactLevelTitle": metrics.usesCompactLevelTitle,
+            "usesCompactScoresTitle": metrics.usesCompactScoresTitle
+        ]
     }
 }
