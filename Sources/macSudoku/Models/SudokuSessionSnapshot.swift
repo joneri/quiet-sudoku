@@ -9,4 +9,8 @@ struct SudokuSessionSnapshot: Codable, Equatable {
     var progression: SudokuProgression {
         SudokuGame(snapshot: self)?.progression ?? .empty
     }
+
+    var isComplete: Bool {
+        SudokuGame(snapshot: self)?.isComplete ?? false
+    }
 }

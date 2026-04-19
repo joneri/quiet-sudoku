@@ -73,6 +73,16 @@ assert 3 in state["completedDigits"]
 assert 0 in state["completedBlocks"]
 assert 0 in state["completedRows"]
 assert 0 in state["completedColumns"]
+assert state["edgeLightRowCount"] == 1
+assert state["edgeLightColumnCount"] == 1
+row_endpoints = [item for item in state["edgeLightEndpoints"] if item["axis"] == "row" and item["index"] == 0]
+column_endpoints = [item for item in state["edgeLightEndpoints"] if item["axis"] == "column" and item["index"] == 0]
+assert len(row_endpoints) == 1
+assert len(column_endpoints) == 1
+assert row_endpoints[0]["first"]["x"] == 5
+assert row_endpoints[0]["second"]["x"] == 695
+assert column_endpoints[0]["first"]["y"] == 5
+assert column_endpoints[0]["second"]["y"] == 743
 assert 1 not in state["completedDigits"]
 assert 1 not in state["completedBlocks"]
 assert 1 not in state["completedRows"]

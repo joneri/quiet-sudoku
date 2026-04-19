@@ -3,6 +3,7 @@ import SwiftUI
 struct SudokuGridView: View {
     let game: SudokuGame
     let selectedCell: SudokuGame.Cell.ID?
+    let sparkleTriggerCount: Int
     let onSelectCell: (SudokuGame.Cell.ID) -> Void
     private var progression: SudokuProgression {
         game.progression
@@ -39,7 +40,8 @@ struct SudokuGridView: View {
             }
             .frame(width: side, height: side)
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(SudokuProgressionLightsView(progression: progression))
+            .overlay(SudokuBlockCompletionGlowView(progression: progression))
+            .overlay(SudokuSparkleSweepView(triggerCount: sparkleTriggerCount))
             .overlay(SudokuGridLinesView())
             .overlay(completionGlow)
         }

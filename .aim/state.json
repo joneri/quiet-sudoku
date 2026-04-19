@@ -1,22 +1,27 @@
 {
   "aim_version": "1.6",
   "mode": "Auto",
-  "cost_profile": "Standard",
+  "cost_profile": "Deep",
   "epic": {
-    "title": "Progression lights for completed digits and blocks",
+    "title": "Magical board shimmer animation",
     "status": "final_review"
   },
-  "current_role": "Reviewer",
+  "current_role": "PO",
   "current_gate": "E",
   "increments": [
     {
-      "id": "PROG-001",
-      "title": "Digit and block completion lights",
+      "id": "ANIM-001",
+      "title": "Reusable sparkle sweep prototype",
       "status": "accepted"
     },
     {
-      "id": "PROG-002",
-      "title": "Digit glows and row-column edge lights",
+      "id": "ANIM-002",
+      "title": "Board-edge completion lights",
+      "status": "accepted"
+    },
+    {
+      "id": "ANIM-003",
+      "title": "Completion-only magic wave and verified edge lamps",
       "status": "accepted"
     }
   ]

@@ -167,7 +167,9 @@ SWIFT
 }
 
 wait_for_state 'state["boardSize"] == "large"' "initial generated game"
+wait_for_state 'state["sparkleTriggerCount"] == 0' "new incomplete board does not trigger completion sparkle"
 initial_signature="$(state_value 'state["puzzleSignature"]')"
+initial_sparkle_count="$(state_value 'state["sparkleTriggerCount"]')"
 
 press_accessibility_button "new-board-button"
 wait_for_state 'state["isConfirmingNewBoard"] == True' "new board confirmation appears"
@@ -178,5 +180,6 @@ press_accessibility_button "new-board-button"
 wait_for_state 'state["isConfirmingNewBoard"] == True' "new board confirmation appears again"
 press_accessibility_button "confirm-new-board-button"
 wait_for_state 'state["puzzleSignature"] != "'"$initial_signature"'"' "confirmed new board changes puzzle"
+wait_for_state 'state["sparkleTriggerCount"] == '"$initial_sparkle_count" "confirmed incomplete new board does not trigger completion sparkle"
 
-echo "New board smoke test passed: cancel preserves the puzzle, confirmation changes it."
+echo "New board smoke test passed: cancel preserves the puzzle, confirmation changes it, and completion sparkle stays quiet."

@@ -3,6 +3,8 @@ import SwiftUI
 struct SudokuBoardView: View {
     @State private var store: SudokuSessionStore
     @State private var isConfirmingNewBoard = false
+    @State private var sparkleTriggerCount = 0
+    @State private var wasComplete = false
 
     init(store: SudokuSessionStore = SudokuSessionStore()) {
         _store = State(initialValue: store)
@@ -23,10 +25,17 @@ struct SudokuBoardView: View {
                     SudokuGridView(
                         game: store.game,
                         selectedCell: store.selectedCell,
+                        sparkleTriggerCount: sparkleTriggerCount,
                         onSelectCell: selectCell
                     )
                     .frame(width: store.boardSize.boardSide, height: store.boardSize.boardSide)
                 }
+
+                SudokuBoardEdgeCompletionLightsView(
+                    progression: store.game.progression,
+                    boardSide: store.boardSize.boardSide,
+                    topInset: BoardSize.topBarHeight
+                )
 
                 if isConfirmingNewBoard {
                     Color.black.opacity(0.10)
@@ -48,12 +57,14 @@ struct SudokuBoardView: View {
             KeyboardInputBridge { input in
                 let handled = store.handleKeyboardInput(input)
                 if handled {
+                    triggerSparkleWhenPuzzleBecomesComplete()
                     recordUITestState()
                 }
                 return handled
             }
         }
         .onAppear {
+            wasComplete = store.game.isComplete
             recordUITestState()
         }
         .animation(.snappy(duration: 0.24), value: store.boardSize)
@@ -122,6 +133,7 @@ struct SudokuBoardView: View {
     private func confirmNewBoard() {
         isConfirmingNewBoard = false
         store.generateNewBoard()
+        wasComplete = store.game.isComplete
         recordUITestState()
     }
 
@@ -131,6 +143,22 @@ struct SudokuBoardView: View {
     }
 
     private func recordUITestState() {
-        UITestProbe.record(snapshot: store.snapshot(), isConfirmingNewBoard: isConfirmingNewBoard)
+        UITestProbe.record(
+            snapshot: store.snapshot(),
+            isConfirmingNewBoard: isConfirmingNewBoard,
+            sparkleTriggerCount: sparkleTriggerCount
+        )
+    }
+
+    private func triggerSparkle() {
+        sparkleTriggerCount += 1
+    }
+
+    private func triggerSparkleWhenPuzzleBecomesComplete() {
+        let isComplete = store.game.isComplete
+        if isComplete && !wasComplete {
+            triggerSparkle()
+        }
+        wasComplete = isComplete
     }
 }
