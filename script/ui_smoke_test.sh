@@ -78,28 +78,13 @@ print(eval(sys.argv[2], {"__builtins__": {}}, {"state": state, "editable_cells":
 PY
 }
 
-send_keycode() {
-  local keycode="$1"
-  local pid
-  pid="$(pgrep -x "$APP_NAME" | head -n 1)"
-
-  /usr/bin/swift - "$pid" "$keycode" <<'SWIFT'
-import AppKit
-import CoreGraphics
-import Foundation
-
-let pid = pid_t(Int32(CommandLine.arguments[1])!)
-let keyCode = CGKeyCode(UInt16(CommandLine.arguments[2])!)
-
-NSRunningApplication(processIdentifier: pid)?.activate()
-Thread.sleep(forTimeInterval: 0.1)
-
-let source = CGEventSource(stateID: .hidSystemState)
-let down = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: true)
-let up = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: false)
-down?.postToPid(pid)
-up?.postToPid(pid)
-SWIFT
+send_text() {
+  local text="$1"
+  /usr/bin/osascript <<OSA
+tell application "$APP_NAME" to activate
+delay 0.1
+tell application "System Events" to keystroke "$text"
+OSA
 }
 
 click_cell() {
@@ -178,8 +163,8 @@ first_column="${first_cell##* }"
 
 click_cell "$first_row" "$first_column"
 wait_for_state "state[\"selected\"][\"row\"] == $first_row and state[\"selected\"][\"column\"] == $first_column" "mouse click selects first editable cell"
-send_keycode 21
-wait_for_state 'cell('"$first_row"', '"$first_column"')["value"] == 4' "typing 4 into first editable cell"
+send_text "4"
+wait_for_state 'cell('"$first_row"', '"$first_column"')["value"] is None and cell('"$first_row"', '"$first_column"')["candidateValue"] == 4' "typing 4 creates a floating candidate"
 
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 rm -f "$STATE_FILE"
@@ -190,6 +175,6 @@ touch "$STATE_FILE"
   --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
   "$APP_BUNDLE"
 
-wait_for_state 'cell('"$first_row"', '"$first_column"')["value"] == 4' "saved number restores after relaunch"
+wait_for_state 'cell('"$first_row"', '"$first_column"')["value"] is None and cell('"$first_row"', '"$first_column"')["candidateValue"] == 4' "saved floating candidate restores after relaunch"
 
-echo "UI smoke test passed: keyboard entry, mouse selection, and relaunch restore work."
+echo "UI smoke test passed: keyboard candidate entry, mouse selection, and relaunch restore work."

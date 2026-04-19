@@ -4,8 +4,8 @@ set -euo pipefail
 APP_NAME="macSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
-STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-complete-state.XXXXXX.json")"
-SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-complete-save.XXXXXX.json")"
+STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-lock-state.XXXXXX.json")"
+SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-lock-save.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true
@@ -33,16 +33,14 @@ solution = [
     [9, 1, 2, 3, 4, 5, 6, 7, 8],
 ]
 
-values = [value for row in solution for value in row]
-values[3] = None
-
 snapshot = {
     "puzzle": {
         "puzzle": [[0 for _ in range(9)] for _ in range(9)],
         "solution": solution,
     },
-    "values": values,
-    "selectedCellID": 3,
+    "values": [None for _ in range(81)],
+    "candidateValues": [None for _ in range(81)],
+    "selectedCellID": 0,
     "boardSize": "large",
     "livesRemaining": 3,
 }
@@ -73,7 +71,13 @@ try:
 except Exception:
     sys.exit(1)
 
-sys.exit(0 if eval(expression, {"__builtins__": {}}, {"state": state}) else 1)
+def cell(row, column):
+    for item in state["cells"]:
+        if item["row"] == row and item["column"] == column:
+            return item
+    raise KeyError((row, column))
+
+sys.exit(0 if eval(expression, {"__builtins__": {}}, {"state": state, "cell": cell}) else 1)
 PY
     then
       return 0
@@ -82,18 +86,9 @@ PY
     sleep 0.1
   done
 
-  echo "Completion animation smoke test failed while waiting for: $label" >&2
+  echo "Lock/lives smoke test failed while waiting for: $label" >&2
   [[ -f "$STATE_FILE" ]] && cat "$STATE_FILE" >&2
   exit 1
-}
-
-send_text() {
-  local text="$1"
-  /usr/bin/osascript <<OSA
-tell application "$APP_NAME" to activate
-delay 0.1
-tell application "System Events" to keystroke "$text"
-OSA
 }
 
 press_accessibility_button() {
@@ -103,6 +98,7 @@ press_accessibility_button() {
 
   /usr/bin/swift - "$pid" "$match" <<'SWIFT'
 import AppKit
+import CoreGraphics
 import Foundation
 
 let pid = pid_t(Int32(CommandLine.arguments[1])!)
@@ -170,81 +166,23 @@ guard result == .success else {
 SWIFT
 }
 
-click_cell() {
-  local row="$1"
-  local column="$2"
-  local pid
-  pid="$(pgrep -x "$APP_NAME" | head -n 1)"
-
-  /usr/bin/swift - "$pid" "$row" "$column" <<'SWIFT'
-import AppKit
-import Foundation
-
-let pid = pid_t(Int32(CommandLine.arguments[1])!)
-let row = CommandLine.arguments[2]
-let column = CommandLine.arguments[3]
-let targetIdentifier = "sudoku-cell-\(row)-\(column)"
-
-func children(of element: AXUIElement) -> [AXUIElement] {
-    var value: CFTypeRef?
-    guard AXUIElementCopyAttributeValue(element, kAXChildrenAttribute as CFString, &value) == .success else {
-        return []
-    }
-
-    return (value as? [AXUIElement]) ?? []
+send_text() {
+  local text="$1"
+  /usr/bin/osascript <<OSA
+tell application "$APP_NAME" to activate
+delay 0.1
+tell application "System Events" to keystroke "$text"
+OSA
 }
 
-func stringAttribute(_ name: String, of element: AXUIElement) -> String? {
-    var value: CFTypeRef?
-    guard AXUIElementCopyAttributeValue(element, name as CFString, &value) == .success else {
-        return nil
-    }
+wait_for_state 'state["livesRemaining"] == 3 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] is None' "initial lock test state"
+send_text "2"
+wait_for_state 'state["livesRemaining"] == 3 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 2' "wrong candidate floats without counting"
+press_accessibility_button "lock-candidate-cell-0-0"
+wait_for_state 'state["livesRemaining"] == 2 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 2' "wrong cell lock loses one life and keeps candidate unlocked"
+send_text "1"
+wait_for_state 'state["livesRemaining"] == 2 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 1' "correct candidate floats before lock"
+press_accessibility_button "lock-candidate-cell-0-0"
+wait_for_state 'state["livesRemaining"] == 2 and cell(0, 0)["value"] == 1 and cell(0, 0)["candidateValue"] is None' "correct cell lock commits value without losing another life"
 
-    return value as? String
-}
-
-func findElement(identifier: String, in element: AXUIElement) -> AXUIElement? {
-    if stringAttribute("AXIdentifier", of: element) == identifier {
-        return element
-    }
-
-    for child in children(of: element) {
-        if let match = findElement(identifier: identifier, in: child) {
-            return match
-        }
-    }
-
-    return nil
-}
-
-guard let app = NSRunningApplication(processIdentifier: pid) else {
-    fputs("Could not find running macSudoku app\n", stderr)
-    exit(1)
-}
-
-app.activate()
-Thread.sleep(forTimeInterval: 0.1)
-
-let appElement = AXUIElementCreateApplication(pid)
-guard let cell = findElement(identifier: targetIdentifier, in: appElement) else {
-    fputs("Could not find \(targetIdentifier) through Accessibility\n", stderr)
-    exit(2)
-}
-
-let result = AXUIElementPerformAction(cell, kAXPressAction as CFString)
-guard result == .success else {
-    fputs("Could not press \(targetIdentifier). Result: \(result.rawValue)\n", stderr)
-    exit(2)
-}
-SWIFT
-}
-
-wait_for_state 'state["isComplete"] == False and state["sparkleTriggerCount"] == 0 and state["livesRemaining"] == 3' "nearly complete puzzle starts without completion sparkle"
-click_cell 0 3
-wait_for_state 'state["selected"]["row"] == 0 and state["selected"]["column"] == 3' "last empty cell is selected"
-send_text "4"
-wait_for_state 'state["isComplete"] == False and state["sparkleTriggerCount"] == 0' "final digit floats before lock"
-press_accessibility_button "lock-candidate-cell-0-3"
-wait_for_state 'state["isComplete"] == True and state["sparkleTriggerCount"] == 1 and state["livesRemaining"] == 4' "final correct digit solves puzzle, triggers exactly one sparkle, and awards one heart"
-
-echo "Completion animation smoke test passed: sparkle triggers only when the puzzle becomes complete and awards one heart."
+echo "Lock/lives smoke test passed: candidates float, wrong locks cost a life, correct locks commit."

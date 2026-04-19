@@ -7,10 +7,14 @@ final class SudokuGame {
         let column: Int
         let given: Int?
         var value: Int?
+        var candidateValue: Int?
 
         var id: Int { row * 9 + column }
         var isGiven: Bool { given != nil }
-        var displayValue: Int? { given ?? value }
+        var isLocked: Bool { given != nil || value != nil }
+        var displayValue: Int? { given ?? value ?? candidateValue }
+        var lockedValue: Int? { given ?? value }
+        var hasCandidate: Bool { !isLocked && candidateValue != nil }
     }
 
     private(set) var cells: [Cell]
@@ -21,7 +25,7 @@ final class SudokuGame {
         cells = puzzle.enumerated().flatMap { rowIndex, row in
             row.enumerated().map { columnIndex, number in
                 let given = number == 0 ? nil : number
-                return Cell(row: rowIndex, column: columnIndex, given: given, value: nil)
+                return Cell(row: rowIndex, column: columnIndex, given: given, value: nil, candidateValue: nil)
             }
         }
     }
@@ -39,6 +43,13 @@ final class SudokuGame {
                 cells[index].value = snapshot.values[index]
             }
         }
+
+        let candidateValues = snapshot.normalizedCandidateValues
+        for index in candidateValues.indices {
+            if !cells[index].isLocked {
+                cells[index].candidateValue = candidateValues[index]
+            }
+        }
     }
 
     func cell(at row: Int, column: Int) -> Cell {
@@ -49,14 +60,51 @@ final class SudokuGame {
         let index = row * 9 + column
         guard cells.indices.contains(index), !cells[index].isGiven else { return }
         cells[index].value = value
+        cells[index].candidateValue = nil
+    }
+
+    func setCandidateValue(_ value: Int?, row: Int, column: Int) {
+        let index = row * 9 + column
+        guard cells.indices.contains(index), !cells[index].isLocked else { return }
+        cells[index].candidateValue = value
+    }
+
+    func lockCandidate(row: Int, column: Int) -> Bool? {
+        let index = row * 9 + column
+        return lockCandidate(cellID: index)
+    }
+
+    func lockCandidate(cellID: Cell.ID) -> Bool? {
+        guard cells.indices.contains(cellID) else { return nil }
+        let row = cells[cellID].row
+        let column = cells[cellID].column
+
+        guard
+            !cells[cellID].isLocked,
+            let candidateValue = cells[cellID].candidateValue
+        else {
+            return nil
+        }
+
+        guard candidateValue == puzzle.solution[row][column] else {
+            return false
+        }
+
+        cells[cellID].value = candidateValue
+        cells[cellID].candidateValue = nil
+        return true
+    }
+
+    var candidateCellIDs: [Cell.ID] {
+        cells.filter(\.hasCandidate).map(\.id)
     }
 
     func hasConflict(at row: Int, column: Int) -> Bool {
         let current = cell(at: row, column: column)
-        guard let value = current.displayValue else { return false }
+        guard let value = current.lockedValue else { return false }
 
         return peers(for: row, column: column).contains { peer in
-            peer.id != current.id && peer.displayValue == value
+            peer.id != current.id && peer.lockedValue == value
         }
     }
 
@@ -73,9 +121,9 @@ final class SudokuGame {
     }
 
     var isComplete: Bool {
-        cells.allSatisfy { $0.displayValue != nil }
+        cells.allSatisfy { $0.lockedValue != nil }
             && !cells.contains { hasConflict(at: $0.row, column: $0.column) }
-            && cells.allSatisfy { $0.displayValue == puzzle.solution[$0.row][$0.column] }
+            && cells.allSatisfy { $0.lockedValue == puzzle.solution[$0.row][$0.column] }
     }
 
     var firstEditableCellID: Cell.ID? {
@@ -84,6 +132,10 @@ final class SudokuGame {
 
     var values: [Int?] {
         cells.map(\.value)
+    }
+
+    var candidateValues: [Int?] {
+        cells.map(\.candidateValue)
     }
 
     var progression: SudokuProgression {
@@ -98,10 +150,10 @@ final class SudokuGame {
     private func isDigitComplete(_ digit: Int) -> Bool {
         cells.allSatisfy { cell in
             if puzzle.solution[cell.row][cell.column] == digit {
-                return cell.displayValue == digit && !hasConflict(at: cell.row, column: cell.column)
+                return cell.lockedValue == digit && !hasConflict(at: cell.row, column: cell.column)
             }
 
-            return cell.displayValue != digit
+            return cell.lockedValue != digit
         }
     }
 
@@ -114,7 +166,7 @@ final class SudokuGame {
         }
 
         return blockCells.allSatisfy { cell in
-            guard let value = cell.displayValue else { return false }
+            guard let value = cell.lockedValue else { return false }
             return value == puzzle.solution[cell.row][cell.column]
                 && !hasConflict(at: cell.row, column: cell.column)
         }
@@ -133,7 +185,7 @@ final class SudokuGame {
     }
 
     private func isCellCorrectAndConflictFree(_ cell: Cell) -> Bool {
-        guard let value = cell.displayValue else { return false }
+        guard let value = cell.lockedValue else { return false }
         return value == puzzle.solution[cell.row][cell.column]
             && !hasConflict(at: cell.row, column: cell.column)
     }

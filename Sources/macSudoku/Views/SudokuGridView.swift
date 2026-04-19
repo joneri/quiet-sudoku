@@ -4,6 +4,7 @@ struct SudokuGridView: View {
     let game: SudokuGame
     let selectedCell: SudokuGame.Cell.ID?
     let sparkleTriggerCount: Int
+    let onLockCandidate: (SudokuGame.Cell.ID) -> Void
     let onSelectCell: (SudokuGame.Cell.ID) -> Void
     private var progression: SudokuProgression {
         game.progression
@@ -19,21 +20,33 @@ struct SudokuGridView: View {
                         ForEach(0..<9, id: \.self) { column in
                             let cell = game.cell(at: row, column: column)
 
-                            Button {
-                                onSelectCell(cell.id)
-                            } label: {
-                                SudokuCellView(
-                                    cell: cell,
-                                    isSelected: selectedCell == cell.id,
-                                    isPeer: selectedCell.map { isPeer(cell.id, $0) } ?? false,
-                                    isMatched: game.isMatchingSelectedValue(cell, selectedCellID: selectedCell),
-                                    hasConflict: game.hasConflict(at: row, column: column),
-                                    isDigitComplete: cell.displayValue.map { progression.completedDigits.contains($0) } ?? false
-                                )
+                            ZStack {
+                                Button {
+                                    onSelectCell(cell.id)
+                                } label: {
+                                    SudokuCellView(
+                                        cell: cell,
+                                        isSelected: selectedCell == cell.id,
+                                        isPeer: selectedCell.map { isPeer(cell.id, $0) } ?? false,
+                                        isMatched: game.isMatchingSelectedValue(cell, selectedCellID: selectedCell),
+                                        hasConflict: game.hasConflict(at: row, column: column),
+                                        isDigitComplete: cell.displayValue.map { progression.completedDigits.contains($0) } ?? false
+                                    )
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel("Sudoku cell row \(row + 1) column \(column + 1)")
+                                .accessibilityIdentifier("sudoku-cell-\(row)-\(column)")
+
+                                if cell.hasCandidate {
+                                    CandidateLockButton {
+                                        onLockCandidate(cell.id)
+                                    }
+                                    .padding(5)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                                    .accessibilityLabel("Lock cell row \(row + 1) column \(column + 1)")
+                                    .accessibilityIdentifier("lock-candidate-cell-\(row)-\(column)")
+                                }
                             }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel("Sudoku cell row \(row + 1) column \(column + 1)")
-                            .accessibilityIdentifier("sudoku-cell-\(row)-\(column)")
                         }
                     }
                 }
@@ -67,5 +80,25 @@ struct SudokuGridView: View {
         return lhsRow == rhsRow
             || lhsColumn == rhsColumn
             || (lhsRow / 3 == rhsRow / 3 && lhsColumn / 3 == rhsColumn / 3)
+    }
+}
+
+private struct CandidateLockButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "arrow.down.to.line.compact")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Color.white.opacity(0.95))
+                .frame(width: 24, height: 24)
+                .background {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .fill(Color.green.opacity(0.72))
+                        .shadow(color: Color.black.opacity(0.32), radius: 7, y: 4)
+                }
+                .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        }
+        .buttonStyle(.plain)
     }
 }

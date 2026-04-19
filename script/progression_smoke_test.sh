@@ -81,7 +81,7 @@ assert len(row_endpoints) == 1
 assert len(column_endpoints) == 1
 assert row_endpoints[0]["first"]["x"] == 5
 assert row_endpoints[0]["second"]["x"] == 695
-assert column_endpoints[0]["first"]["y"] == 5
+assert column_endpoints[0]["first"]["y"] == 53
 assert column_endpoints[0]["second"]["y"] == 743
 assert 1 not in state["completedDigits"]
 assert 1 not in state["completedBlocks"]

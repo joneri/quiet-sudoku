@@ -1,27 +1,32 @@
 {
   "aim_version": "1.6",
   "mode": "Auto",
-  "cost_profile": "Deep",
+  "cost_profile": "Cost Control",
   "epic": {
-    "title": "Magical board shimmer animation",
+    "title": "Candidate locking, inline lock actions, and lives",
     "status": "final_review"
   },
   "current_role": "PO",
   "current_gate": "E",
   "increments": [
     {
-      "id": "ANIM-001",
-      "title": "Reusable sparkle sweep prototype",
+      "id": "LOCK-001",
+      "title": "Floating candidates, lock button, and lives",
       "status": "accepted"
     },
     {
-      "id": "ANIM-002",
-      "title": "Board-edge completion lights",
+      "id": "LOCK-002",
+      "title": "Stronger floating candidate styling",
       "status": "accepted"
     },
     {
-      "id": "ANIM-003",
-      "title": "Completion-only magic wave and verified edge lamps",
+      "id": "LOCK-003",
+      "title": "Game Over at zero lives",
+      "status": "accepted"
+    },
+    {
+      "id": "LOCK-004",
+      "title": "Inline candidate locks, Lock all, and three-life baseline",
       "status": "accepted"
     }
   ]

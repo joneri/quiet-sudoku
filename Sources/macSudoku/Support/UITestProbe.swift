@@ -11,6 +11,7 @@ enum UITestProbe {
     static func record(
         snapshot: SudokuSessionSnapshot,
         isConfirmingNewBoard: Bool,
+        isGameOver: Bool,
         sparkleTriggerCount: Int
     ) {
         guard let statePath else { return }
@@ -34,9 +35,20 @@ enum UITestProbe {
             puzzleRow.enumerated().map { column, given -> [String: Any] in
                 let index = row * 9 + column
                 let value = snapshot.values[index]
-                let displayValue: Any = given == 0 ? (value.map { $0 as Any } ?? NSNull()) : given
+                let candidateValue = snapshot.normalizedCandidateValues[index]
+                let displayValue: Any
+                if given != 0 {
+                    displayValue = given
+                } else if let value {
+                    displayValue = value
+                } else if let candidateValue {
+                    displayValue = candidateValue
+                } else {
+                    displayValue = NSNull()
+                }
 
                 return [
+                    "candidateValue": candidateValue ?? NSNull(),
                     "row": row,
                     "column": column,
                     "given": given == 0 ? NSNull() : given,
@@ -73,6 +85,8 @@ enum UITestProbe {
             "edgeLightRowCount": progression.completedRows.count,
             "isComplete": snapshot.isComplete,
             "isConfirmingNewBoard": isConfirmingNewBoard,
+            "isGameOver": isGameOver,
+            "livesRemaining": snapshot.livesRemaining,
             "puzzleSignature": snapshot.puzzle.puzzle.flatMap { $0 }.map(String.init).joined(separator: ","),
             "sparkleTriggerCount": sparkleTriggerCount,
             "cells": cells

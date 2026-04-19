@@ -63,7 +63,7 @@ struct SudokuBoardEdgeCompletionLightsView: View {
         return ZStack {
             edgeLamp
                 .frame(width: max(cellSide * 0.52, 16), height: 7)
-                .position(x: x, y: 5)
+                .position(x: x, y: topInset + 5)
 
             edgeLamp
                 .frame(width: max(cellSide * 0.52, 16), height: 7)
@@ -128,7 +128,7 @@ extension SudokuBoardEdgeCompletionLightsView {
             return Endpoint(
                 axis: .column,
                 index: column,
-                first: CGPoint(x: x, y: 5),
+                first: CGPoint(x: x, y: topInset + 5),
                 second: CGPoint(x: x, y: windowHeight - 5)
             )
         }

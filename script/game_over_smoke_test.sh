@@ -4,8 +4,8 @@ set -euo pipefail
 APP_NAME="macSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
-STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-complete-state.XXXXXX.json")"
-SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-complete-save.XXXXXX.json")"
+STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-game-over-state.XXXXXX.json")"
+SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-game-over-save.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true
@@ -33,18 +33,19 @@ solution = [
     [9, 1, 2, 3, 4, 5, 6, 7, 8],
 ]
 
-values = [value for row in solution for value in row]
-values[3] = None
+candidate_values = [None for _ in range(81)]
+candidate_values[0] = 2
 
 snapshot = {
     "puzzle": {
         "puzzle": [[0 for _ in range(9)] for _ in range(9)],
         "solution": solution,
     },
-    "values": values,
-    "selectedCellID": 3,
+    "values": [None for _ in range(81)],
+    "candidateValues": candidate_values,
+    "selectedCellID": 0,
     "boardSize": "large",
-    "livesRemaining": 3,
+    "livesRemaining": 1,
 }
 
 with open(sys.argv[1], "w", encoding="utf-8") as handle:
@@ -82,18 +83,22 @@ PY
     sleep 0.1
   done
 
-  echo "Completion animation smoke test failed while waiting for: $label" >&2
+  echo "Game Over smoke test failed while waiting for: $label" >&2
   [[ -f "$STATE_FILE" ]] && cat "$STATE_FILE" >&2
   exit 1
 }
 
-send_text() {
-  local text="$1"
-  /usr/bin/osascript <<OSA
-tell application "$APP_NAME" to activate
-delay 0.1
-tell application "System Events" to keystroke "$text"
-OSA
+state_value() {
+  local expression="$1"
+  /usr/bin/python3 - "$STATE_FILE" "$expression" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    state = json.load(handle)
+
+print(eval(sys.argv[2], {"__builtins__": {}}, {"state": state}))
+PY
 }
 
 press_accessibility_button() {
@@ -170,81 +175,11 @@ guard result == .success else {
 SWIFT
 }
 
-click_cell() {
-  local row="$1"
-  local column="$2"
-  local pid
-  pid="$(pgrep -x "$APP_NAME" | head -n 1)"
+wait_for_state 'state["livesRemaining"] == 1 and state["isGameOver"] == False and state["isConfirmingNewBoard"] == False' "one life game starts without game over"
+initial_signature="$(state_value 'state["puzzleSignature"]')"
+press_accessibility_button "lock-candidate-cell-0-0"
+wait_for_state 'state["livesRemaining"] == 0 and state["isGameOver"] == True and state["isConfirmingNewBoard"] == True' "last wrong lock shows Game Over and prompts for a new board"
+press_accessibility_button "confirm-new-board-button"
+wait_for_state 'state["livesRemaining"] == 3 and state["isGameOver"] == False and state["isConfirmingNewBoard"] == False and state["puzzleSignature"] != "'"$initial_signature"'"' "confirming after Game Over generates a fresh board"
 
-  /usr/bin/swift - "$pid" "$row" "$column" <<'SWIFT'
-import AppKit
-import Foundation
-
-let pid = pid_t(Int32(CommandLine.arguments[1])!)
-let row = CommandLine.arguments[2]
-let column = CommandLine.arguments[3]
-let targetIdentifier = "sudoku-cell-\(row)-\(column)"
-
-func children(of element: AXUIElement) -> [AXUIElement] {
-    var value: CFTypeRef?
-    guard AXUIElementCopyAttributeValue(element, kAXChildrenAttribute as CFString, &value) == .success else {
-        return []
-    }
-
-    return (value as? [AXUIElement]) ?? []
-}
-
-func stringAttribute(_ name: String, of element: AXUIElement) -> String? {
-    var value: CFTypeRef?
-    guard AXUIElementCopyAttributeValue(element, name as CFString, &value) == .success else {
-        return nil
-    }
-
-    return value as? String
-}
-
-func findElement(identifier: String, in element: AXUIElement) -> AXUIElement? {
-    if stringAttribute("AXIdentifier", of: element) == identifier {
-        return element
-    }
-
-    for child in children(of: element) {
-        if let match = findElement(identifier: identifier, in: child) {
-            return match
-        }
-    }
-
-    return nil
-}
-
-guard let app = NSRunningApplication(processIdentifier: pid) else {
-    fputs("Could not find running macSudoku app\n", stderr)
-    exit(1)
-}
-
-app.activate()
-Thread.sleep(forTimeInterval: 0.1)
-
-let appElement = AXUIElementCreateApplication(pid)
-guard let cell = findElement(identifier: targetIdentifier, in: appElement) else {
-    fputs("Could not find \(targetIdentifier) through Accessibility\n", stderr)
-    exit(2)
-}
-
-let result = AXUIElementPerformAction(cell, kAXPressAction as CFString)
-guard result == .success else {
-    fputs("Could not press \(targetIdentifier). Result: \(result.rawValue)\n", stderr)
-    exit(2)
-}
-SWIFT
-}
-
-wait_for_state 'state["isComplete"] == False and state["sparkleTriggerCount"] == 0 and state["livesRemaining"] == 3' "nearly complete puzzle starts without completion sparkle"
-click_cell 0 3
-wait_for_state 'state["selected"]["row"] == 0 and state["selected"]["column"] == 3' "last empty cell is selected"
-send_text "4"
-wait_for_state 'state["isComplete"] == False and state["sparkleTriggerCount"] == 0' "final digit floats before lock"
-press_accessibility_button "lock-candidate-cell-0-3"
-wait_for_state 'state["isComplete"] == True and state["sparkleTriggerCount"] == 1 and state["livesRemaining"] == 4' "final correct digit solves puzzle, triggers exactly one sparkle, and awards one heart"
-
-echo "Completion animation smoke test passed: sparkle triggers only when the puzzle becomes complete and awards one heart."
+echo "Game Over smoke test passed: final lost life shows Game Over, opens new-board confirmation, and Generate resets the game."

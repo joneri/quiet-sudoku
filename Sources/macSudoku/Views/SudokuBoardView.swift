@@ -18,7 +18,9 @@ struct SudokuBoardView: View {
                 VStack(spacing: 0) {
                     SudokuTopBarView(
                         boardSize: store.boardSize,
+                        livesRemaining: store.livesRemaining,
                         onCycleBoardSize: cycleBoardSize,
+                        onLockAllCandidates: lockAllCandidates,
                         onRequestNewBoard: requestNewBoard
                     )
 
@@ -26,6 +28,7 @@ struct SudokuBoardView: View {
                         game: store.game,
                         selectedCell: store.selectedCell,
                         sparkleTriggerCount: sparkleTriggerCount,
+                        onLockCandidate: lockCandidate,
                         onSelectCell: selectCell
                     )
                     .frame(width: store.boardSize.boardSide, height: store.boardSize.boardSide)
@@ -36,6 +39,10 @@ struct SudokuBoardView: View {
                     boardSide: store.boardSize.boardSide,
                     topInset: BoardSize.topBarHeight
                 )
+
+                if store.isGameOver {
+                    gameOverOverlay
+                }
 
                 if isConfirmingNewBoard {
                     Color.black.opacity(0.10)
@@ -65,6 +72,15 @@ struct SudokuBoardView: View {
         }
         .onAppear {
             wasComplete = store.game.isComplete
+            if store.isGameOver {
+                isConfirmingNewBoard = true
+            }
+            recordUITestState()
+        }
+        .onChange(of: store.livesRemaining) { _, livesRemaining in
+            if livesRemaining == 0 {
+                isConfirmingNewBoard = true
+            }
             recordUITestState()
         }
         .animation(.snappy(duration: 0.24), value: store.boardSize)
@@ -115,8 +131,39 @@ struct SudokuBoardView: View {
             .ignoresSafeArea()
     }
 
+    private var gameOverOverlay: some View {
+        VStack(spacing: 8) {
+            Text("Game Over")
+                .font(.system(size: 46, weight: .black, design: .rounded))
+                .foregroundStyle(Color.red.opacity(0.94))
+                .shadow(color: Color.black.opacity(0.40), radius: 14, y: 6)
+
+            Text("Generate a new board to play again.")
+                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .foregroundStyle(.primary.opacity(0.78))
+        }
+        .frame(width: store.boardSize.boardSide, height: store.boardSize.windowHeight)
+        .background(Color.black.opacity(0.18))
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Game Over")
+        .accessibilityIdentifier("game-over-overlay")
+    }
+
     private func cycleBoardSize() {
         store.cycleBoardSize()
+        recordUITestState()
+    }
+
+    private func lockCandidate(_ cellID: SudokuGame.Cell.ID) {
+        store.lockCandidate(cellID: cellID)
+        triggerSparkleWhenPuzzleBecomesComplete()
+        recordUITestState()
+    }
+
+    private func lockAllCandidates() {
+        store.lockAllCandidates()
+        triggerSparkleWhenPuzzleBecomesComplete()
         recordUITestState()
     }
 
@@ -146,6 +193,7 @@ struct SudokuBoardView: View {
         UITestProbe.record(
             snapshot: store.snapshot(),
             isConfirmingNewBoard: isConfirmingNewBoard,
+            isGameOver: store.isGameOver,
             sparkleTriggerCount: sparkleTriggerCount
         )
     }
@@ -157,6 +205,7 @@ struct SudokuBoardView: View {
     private func triggerSparkleWhenPuzzleBecomesComplete() {
         let isComplete = store.game.isComplete
         if isComplete && !wasComplete {
+            store.awardCompletionLife()
             triggerSparkle()
         }
         wasComplete = isComplete

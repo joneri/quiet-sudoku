@@ -2,7 +2,9 @@ import SwiftUI
 
 struct SudokuTopBarView: View {
     let boardSize: BoardSize
+    let livesRemaining: Int
     let onCycleBoardSize: () -> Void
+    let onLockAllCandidates: () -> Void
     let onRequestNewBoard: () -> Void
 
     var body: some View {
@@ -14,8 +16,15 @@ struct SudokuTopBarView: View {
 
             HStack {
                 newBoardButton
+
                 Spacer()
-                sizeButton
+                lifeHearts
+                Spacer()
+
+                HStack(spacing: 8) {
+                    lockAllButton
+                    sizeButton
+                }
             }
             .padding(.horizontal, 12)
         }
@@ -55,6 +64,40 @@ struct SudokuTopBarView: View {
         .accessibilityValue(boardSize.accessibilityValue)
         .accessibilityIdentifier("board-size-button")
         .background(buttonBackground)
+    }
+
+    private var lockAllButton: some View {
+        Button(action: onLockAllCandidates) {
+            Text("Lock all")
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(.primary)
+                .frame(width: 82, height: 30)
+                .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Lock all numbers")
+        .accessibilityIdentifier("lock-all-candidates-button")
+        .background(buttonBackground)
+    }
+
+    private var lifeHearts: some View {
+        HStack(spacing: 5) {
+            ForEach(0..<heartCount, id: \.self) { index in
+                Image(systemName: index < livesRemaining ? "heart.fill" : "heart")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(index < livesRemaining ? Color.red.opacity(0.94) : Color.primary.opacity(0.42))
+                    .accessibilityHidden(true)
+            }
+        }
+        .frame(width: CGFloat(heartCount) * 19 + 12, height: 30)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Lives")
+        .accessibilityValue("\(livesRemaining)")
+        .accessibilityIdentifier("life-hearts")
+    }
+
+    private var heartCount: Int {
+        max(SudokuSessionStore.startingLives, livesRemaining)
     }
 
     private var buttonBackground: some View {

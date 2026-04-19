@@ -15,11 +15,15 @@ struct SudokuCellView: View {
 
             if let value = cell.displayValue {
                 Text("\(value)")
-                    .font(.system(size: 28, weight: cell.isGiven ? .semibold : .medium, design: .rounded))
+                    .font(.system(size: fontSize, weight: fontWeight, design: .rounded))
                     .minimumScaleFactor(0.32)
                     .foregroundStyle(foregroundStyle)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .shadow(color: digitGlowColor, radius: isDigitComplete ? 11 : 0)
+                    .shadow(color: candidateShadowColor, radius: cell.hasCandidate ? 13 : 0, y: cell.hasCandidate ? 13 : 0)
+                    .shadow(color: Color.black.opacity(cell.hasCandidate ? 0.34 : 0), radius: cell.hasCandidate ? 4 : 0, y: cell.hasCandidate ? 6 : 0)
+                    .offset(y: cell.hasCandidate ? -7 : 0)
+                    .animation(.snappy(duration: 0.22), value: cell.hasCandidate)
             }
         }
         .aspectRatio(1, contentMode: .fit)
@@ -57,10 +61,30 @@ struct SudokuCellView: View {
             return Color.red.opacity(0.95)
         }
 
-        return cell.isGiven ? Color.primary : Color.cyan.opacity(0.95)
+        if cell.hasCandidate {
+            return Color(red: 0.86, green: 0.34, blue: 0.05)
+        }
+
+        return cell.isGiven ? Color.primary : Color.green.opacity(0.88)
     }
 
     private var digitGlowColor: Color {
         hasConflict ? .clear : Color.green.opacity(0.75)
+    }
+
+    private var candidateShadowColor: Color {
+        Color.black.opacity(0.58)
+    }
+
+    private var fontSize: CGFloat {
+        cell.hasCandidate ? 34 : 28
+    }
+
+    private var fontWeight: Font.Weight {
+        if cell.hasCandidate {
+            return .bold
+        }
+
+        return cell.isGiven ? .semibold : .medium
     }
 }
