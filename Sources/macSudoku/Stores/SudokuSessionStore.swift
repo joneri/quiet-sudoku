@@ -7,11 +7,14 @@ final class SudokuSessionStore {
 
     private let generator: SudokuPuzzleGenerator
     private let persistence: SudokuGamePersistence
+    private let leaderboardStore: LeaderboardStore
 
     var game: SudokuGame
     var selectedCell: SudokuGame.Cell.ID?
     var boardSize: BoardSize
     var livesRemaining: Int
+    var level: SudokuLevel
+    var leaderboardEntries: [LeaderboardEntry]
 
     var isGameOver: Bool {
         livesRemaining == 0
@@ -19,18 +22,24 @@ final class SudokuSessionStore {
 
     init(
         generator: SudokuPuzzleGenerator = SudokuPuzzleGenerator(),
-        persistence: SudokuGamePersistence = SudokuGamePersistence()
+        persistence: SudokuGamePersistence = SudokuGamePersistence(),
+        leaderboardStore: LeaderboardStore = LeaderboardStore()
     ) {
         self.generator = generator
         self.persistence = persistence
+        self.leaderboardStore = leaderboardStore
+        leaderboardEntries = leaderboardStore.load()
 
         if let snapshot = persistence.load(), let restoredGame = SudokuGame(snapshot: snapshot) {
             game = restoredGame
             selectedCell = snapshot.selectedCellID
             boardSize = snapshot.boardSize
             livesRemaining = snapshot.livesRemaining
+            level = snapshot.level
         } else {
-            game = SudokuGame(puzzle: generator.generate())
+            let startingLevel = SudokuLevel(1)
+            level = startingLevel
+            game = SudokuGame(puzzle: generator.generate(level: startingLevel))
             selectedCell = nil
             boardSize = .large
             livesRemaining = Self.startingLives
@@ -107,10 +116,23 @@ final class SudokuSessionStore {
     }
 
     func generateNewBoard() {
+        startNewRun()
+    }
+
+    func startNewRun() {
+        level = SudokuLevel(1)
+        game = SudokuGame(puzzle: generator.generate(level: level))
+        selectedCell = game.firstEditableCellID
+        livesRemaining = Self.startingLives
+        save()
+    }
+
+    func advanceToNextLevel() {
+        level = level.next()
         let nextLives = isGameOver
             ? Self.startingLives
             : min(Self.maximumLives, max(Self.startingLives, livesRemaining))
-        game = SudokuGame(puzzle: generator.generate())
+        game = SudokuGame(puzzle: generator.generate(level: level))
         selectedCell = game.firstEditableCellID
         livesRemaining = nextLives
         save()
@@ -123,6 +145,18 @@ final class SudokuSessionStore {
         save()
     }
 
+    var levelsCompleted: Int {
+        level.completedCountBeforeLevel
+    }
+
+    @discardableResult
+    func submitLeaderboardEntry(initials: String) -> LeaderboardEntry {
+        let entry = LeaderboardEntry(initials: initials, levelsCompleted: levelsCompleted)
+        leaderboardEntries = leaderboardStore.adding(entry, to: leaderboardEntries)
+        leaderboardStore.save(leaderboardEntries)
+        return entry
+    }
+
     func snapshot() -> SudokuSessionSnapshot {
         SudokuSessionSnapshot(
             puzzle: game.puzzle,
@@ -130,7 +164,8 @@ final class SudokuSessionStore {
             candidateValues: game.candidateValues,
             selectedCellID: selectedCell,
             boardSize: boardSize,
-            livesRemaining: livesRemaining
+            livesRemaining: livesRemaining,
+            level: level
         )
     }
 

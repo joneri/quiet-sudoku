@@ -7,6 +7,7 @@ struct SudokuSessionSnapshot: Codable, Equatable {
     let selectedCellID: SudokuGame.Cell.ID?
     let boardSize: BoardSize
     let livesRemaining: Int
+    let level: SudokuLevel
 
     init(
         puzzle: SudokuPuzzle,
@@ -14,7 +15,8 @@ struct SudokuSessionSnapshot: Codable, Equatable {
         candidateValues: [Int?],
         selectedCellID: SudokuGame.Cell.ID?,
         boardSize: BoardSize,
-        livesRemaining: Int
+        livesRemaining: Int,
+        level: SudokuLevel
     ) {
         self.puzzle = puzzle
         self.values = values
@@ -22,6 +24,7 @@ struct SudokuSessionSnapshot: Codable, Equatable {
         self.selectedCellID = selectedCellID
         self.boardSize = boardSize
         self.livesRemaining = livesRemaining
+        self.level = level
     }
 
     init(from decoder: Decoder) throws {
@@ -32,6 +35,7 @@ struct SudokuSessionSnapshot: Codable, Equatable {
         selectedCellID = try container.decodeIfPresent(SudokuGame.Cell.ID.self, forKey: .selectedCellID)
         boardSize = try container.decodeIfPresent(BoardSize.self, forKey: .boardSize) ?? .large
         livesRemaining = try container.decodeIfPresent(Int.self, forKey: .livesRemaining) ?? SudokuSessionStore.startingLives
+        level = try container.decodeIfPresent(SudokuLevel.self, forKey: .level) ?? SudokuLevel(1)
     }
 
     var normalizedCandidateValues: [Int?] {

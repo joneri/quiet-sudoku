@@ -9,22 +9,27 @@ struct SudokuCellView: View {
     let isDigitComplete: Bool
 
     var body: some View {
-        ZStack {
-            Rectangle()
-                .fill(backgroundStyle)
+        GeometryReader { proxy in
+            let side = min(proxy.size.width, proxy.size.height)
 
-            if let value = cell.displayValue {
-                Text("\(value)")
-                    .font(.system(size: fontSize, weight: fontWeight, design: .rounded))
-                    .minimumScaleFactor(0.32)
-                    .foregroundStyle(foregroundStyle)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .shadow(color: digitGlowColor, radius: isDigitComplete ? 11 : 0)
-                    .shadow(color: candidateShadowColor, radius: cell.hasCandidate ? 13 : 0, y: cell.hasCandidate ? 13 : 0)
-                    .shadow(color: Color.black.opacity(cell.hasCandidate ? 0.34 : 0), radius: cell.hasCandidate ? 4 : 0, y: cell.hasCandidate ? 6 : 0)
-                    .offset(y: cell.hasCandidate ? -7 : 0)
-                    .animation(.snappy(duration: 0.22), value: cell.hasCandidate)
+            ZStack {
+                Rectangle()
+                    .fill(backgroundStyle)
+
+                if let value = cell.displayValue {
+                    Text("\(value)")
+                        .font(.system(size: fontSize(for: side), weight: fontWeight, design: .rounded))
+                        .minimumScaleFactor(0.32)
+                        .foregroundStyle(foregroundStyle)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .shadow(color: digitGlowColor, radius: isDigitComplete ? min(side * 0.18, 11) : 0)
+                        .shadow(color: candidateShadowColor, radius: cell.hasCandidate ? min(side * 0.24, 13) : 0, y: cell.hasCandidate ? min(side * 0.24, 13) : 0)
+                        .shadow(color: Color.black.opacity(cell.hasCandidate ? 0.34 : 0), radius: cell.hasCandidate ? min(side * 0.10, 4) : 0, y: cell.hasCandidate ? min(side * 0.14, 6) : 0)
+                        .offset(y: cell.hasCandidate ? -candidateLift(for: side) : 0)
+                        .animation(.snappy(duration: 0.22), value: cell.hasCandidate)
+                }
             }
+            .frame(width: proxy.size.width, height: proxy.size.height)
         }
         .aspectRatio(1, contentMode: .fit)
         .overlay {
@@ -76,8 +81,16 @@ struct SudokuCellView: View {
         Color.black.opacity(0.58)
     }
 
-    private var fontSize: CGFloat {
-        cell.hasCandidate ? 34 : 28
+    private func fontSize(for side: CGFloat) -> CGFloat {
+        if cell.hasCandidate {
+            return min(max(side * 0.66, 21), 34)
+        }
+
+        return min(max(side * 0.54, 18), 28)
+    }
+
+    private func candidateLift(for side: CGFloat) -> CGFloat {
+        min(max(side * 0.13, 3), 7)
     }
 
     private var fontWeight: Font.Weight {

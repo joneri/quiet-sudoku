@@ -6,11 +6,13 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
 STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-game-over-state.XXXXXX.json")"
 SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-game-over-save.XXXXXX.json")"
+LEADERBOARD_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-leaderboard.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true
   rm -f "$STATE_FILE"
   rm -f "$SAVE_FILE"
+  rm -f "$LEADERBOARD_FILE"
 }
 trap cleanup EXIT
 
@@ -46,6 +48,7 @@ snapshot = {
     "selectedCellID": 0,
     "boardSize": "large",
     "livesRemaining": 1,
+    "level": {"number": 3},
 }
 
 with open(sys.argv[1], "w", encoding="utf-8") as handle:
@@ -55,6 +58,7 @@ PY
 /usr/bin/open -n \
   --env "MACSUDOKU_UI_STATE_PATH=$STATE_FILE" \
   --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
+  --env "MACSUDOKU_LEADERBOARD_PATH=$LEADERBOARD_FILE" \
   "$APP_BUNDLE"
 
 wait_for_state() {
@@ -175,11 +179,25 @@ guard result == .success else {
 SWIFT
 }
 
-wait_for_state 'state["livesRemaining"] == 1 and state["isGameOver"] == False and state["isConfirmingNewBoard"] == False' "one life game starts without game over"
+send_text() {
+  local text="$1"
+  /usr/bin/osascript <<OSA
+tell application "$APP_NAME" to activate
+delay 0.1
+tell application "System Events" to keystroke "$text"
+OSA
+}
+
+wait_for_state 'state["livesRemaining"] == 1 and state["level"] == 3 and state["levelsCompleted"] == 2 and state["isGameOver"] == False and state["isConfirmingNewBoard"] == False and state["isEnteringLeaderboard"] == False' "one life level 3 game starts without game over"
 initial_signature="$(state_value 'state["puzzleSignature"]')"
 press_accessibility_button "lock-candidate-cell-0-0"
-wait_for_state 'state["livesRemaining"] == 0 and state["isGameOver"] == True and state["isConfirmingNewBoard"] == True' "last wrong lock shows Game Over and prompts for a new board"
+wait_for_state 'state["livesRemaining"] == 0 and state["isGameOver"] == True and state["isEnteringLeaderboard"] == True and state["isConfirmingNewBoard"] == False' "last wrong lock shows Game Over and asks for leaderboard initials"
+send_text "mom"
+press_accessibility_button "submit-leaderboard-button"
+wait_for_state 'state["leaderboardEntries"][0]["initials"] == "MOM" and state["leaderboardEntries"][0]["levelsCompleted"] == 2 and state["isEnteringLeaderboard"] == False and state["isConfirmingNewBoard"] == True' "leaderboard entry is saved before new board prompt"
 press_accessibility_button "confirm-new-board-button"
-wait_for_state 'state["livesRemaining"] == 3 and state["isGameOver"] == False and state["isConfirmingNewBoard"] == False and state["puzzleSignature"] != "'"$initial_signature"'"' "confirming after Game Over generates a fresh board"
+wait_for_state 'state["livesRemaining"] == 3 and state["level"] == 1 and state["levelsCompleted"] == 0 and state["isGameOver"] == False and state["isConfirmingNewBoard"] == False and state["puzzleSignature"] != "'"$initial_signature"'"' "confirming after Game Over starts a fresh level 1 run"
+press_accessibility_button "show-leaderboard-button"
+wait_for_state 'state["isShowingLeaderboard"] == True and state["leaderboardEntries"][0]["initials"] == "MOM" and state["leaderboardEntries"][0]["levelsCompleted"] == 2' "top shelf scores button opens saved leaderboard"
 
-echo "Game Over smoke test passed: final lost life shows Game Over, opens new-board confirmation, and Generate resets the game."
+echo "Game Over smoke test passed: final lost life accepts typed initials, saves leaderboard, resets to level 1, and opens scores from the top shelf."

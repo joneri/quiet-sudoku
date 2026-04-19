@@ -11,8 +11,11 @@ enum UITestProbe {
     static func record(
         snapshot: SudokuSessionSnapshot,
         isConfirmingNewBoard: Bool,
+        isEnteringLeaderboard: Bool,
+        isShowingLeaderboard: Bool,
         isShowingCompletionMessage: Bool,
         isGameOver: Bool,
+        leaderboardEntries: [LeaderboardEntry],
         sparkleTriggerCount: Int
     ) {
         guard let statePath else { return }
@@ -84,13 +87,26 @@ enum UITestProbe {
             "edgeLightColumnCount": progression.completedColumns.count,
             "edgeLightEndpoints": edgeLightEndpoints,
             "edgeLightRowCount": progression.completedRows.count,
+            "filledCellCount": snapshot.puzzle.puzzle.flatMap { $0 }.filter { $0 != 0 }.count,
             "isComplete": snapshot.isComplete,
             "isConfirmingNewBoard": isConfirmingNewBoard,
+            "isEnteringLeaderboard": isEnteringLeaderboard,
             "isGameOver": isGameOver,
+            "isShowingLeaderboard": isShowingLeaderboard,
             "isShowingCompletionMessage": isShowingCompletionMessage,
+            "leaderboardEntries": leaderboardEntries.map { entry in
+                [
+                    "initials": entry.initials,
+                    "levelsCompleted": entry.levelsCompleted
+                ] as [String: Any]
+            },
+            "level": snapshot.level.number,
+            "levelsCompleted": snapshot.level.completedCountBeforeLevel,
             "livesRemaining": snapshot.livesRemaining,
+            "maximumLives": SudokuSessionStore.maximumLives,
             "puzzleSignature": snapshot.puzzle.puzzle.flatMap { $0 }.map(String.init).joined(separator: ","),
             "sparkleTriggerCount": sparkleTriggerCount,
+            "visibleHeartSlots": max(SudokuSessionStore.maximumLives, snapshot.livesRemaining),
             "cells": cells
         ]
 

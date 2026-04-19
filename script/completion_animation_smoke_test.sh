@@ -45,6 +45,7 @@ snapshot = {
     "selectedCellID": 3,
     "boardSize": "large",
     "livesRemaining": 3,
+    "level": {"number": 1},
 }
 
 with open(sys.argv[1], "w", encoding="utf-8") as handle:
@@ -247,5 +248,7 @@ wait_for_state 'state["isComplete"] == False and state["sparkleTriggerCount"] ==
 press_accessibility_button "lock-candidate-cell-0-3"
 wait_for_state 'state["isComplete"] == True and state["sparkleTriggerCount"] == 1 and state["livesRemaining"] == 4 and state["isShowingCompletionMessage"] == True and state["isConfirmingNewBoard"] == False' "final correct digit solves puzzle, triggers exactly one sparkle, awards one heart, and shows congratulations"
 wait_for_state 'state["isComplete"] == True and state["sparkleTriggerCount"] == 1 and state["livesRemaining"] == 4 and state["isShowingCompletionMessage"] == False and state["isConfirmingNewBoard"] == True' "completion prompt appears after congratulations"
+press_accessibility_button "confirm-new-board-button"
+wait_for_state 'state["level"] == 2 and state["levelsCompleted"] == 1 and state["livesRemaining"] == 4 and state["filledCellCount"] == 41 and state["isComplete"] == False and state["isConfirmingNewBoard"] == False' "confirming after completion advances to level 2 with harder puzzle"
 
-echo "Completion animation smoke test passed: sparkle triggers only when the puzzle becomes complete, awards one heart, then prompts for a new board."
+echo "Completion animation smoke test passed: sparkle triggers only when the puzzle becomes complete, awards one heart, then advances to level 2 after confirmation."

@@ -4,6 +4,9 @@ struct SudokuBoardView: View {
     @State private var store: SudokuSessionStore
     @State private var isConfirmingNewBoard = false
     @State private var isShowingCompletionMessage = false
+    @State private var isEnteringLeaderboard = false
+    @State private var isShowingLeaderboard = false
+    @State private var newBoardIntent: NewBoardIntent = .newRun
     @State private var sparkleTriggerCount = 0
     @State private var wasComplete = false
 
@@ -20,9 +23,11 @@ struct SudokuBoardView: View {
                     SudokuTopBarView(
                         boardSize: store.boardSize,
                         livesRemaining: store.livesRemaining,
+                        level: store.level,
                         onCycleBoardSize: cycleBoardSize,
                         onLockAllCandidates: lockAllCandidates,
-                        onRequestNewBoard: requestNewBoard
+                        onRequestNewBoard: requestNewBoard,
+                        onShowLeaderboard: showLeaderboard
                     )
 
                     SudokuGridView(
@@ -43,6 +48,29 @@ struct SudokuBoardView: View {
 
                 if store.isGameOver {
                     gameOverOverlay
+                }
+
+                if isEnteringLeaderboard {
+                    Color.black.opacity(0.10)
+                        .ignoresSafeArea()
+
+                    LeaderboardEntryView(
+                        levelsCompleted: store.levelsCompleted,
+                        entries: store.leaderboardEntries,
+                        onSubmit: submitLeaderboardEntry
+                    )
+                    .transition(.scale(scale: 0.96).combined(with: .opacity))
+                }
+
+                if isShowingLeaderboard {
+                    Color.black.opacity(0.10)
+                        .ignoresSafeArea()
+
+                    LeaderboardListView(
+                        entries: store.leaderboardEntries,
+                        onClose: hideLeaderboard
+                    )
+                    .transition(.scale(scale: 0.96).combined(with: .opacity))
                 }
 
                 if isShowingCompletionMessage && !isConfirmingNewBoard {
@@ -78,19 +106,22 @@ struct SudokuBoardView: View {
         .onAppear {
             wasComplete = store.game.isComplete
             if store.isGameOver {
-                isConfirmingNewBoard = true
+                isEnteringLeaderboard = true
             }
             recordUITestState()
         }
         .onChange(of: store.livesRemaining) { _, livesRemaining in
             if livesRemaining == 0 {
                 isShowingCompletionMessage = false
-                isConfirmingNewBoard = true
+                isConfirmingNewBoard = false
+                isEnteringLeaderboard = true
             }
             recordUITestState()
         }
         .animation(.snappy(duration: 0.24), value: store.boardSize)
         .animation(.snappy(duration: 0.18), value: isConfirmingNewBoard)
+        .animation(.snappy(duration: 0.18), value: isEnteringLeaderboard)
+        .animation(.snappy(duration: 0.18), value: isShowingLeaderboard)
         .animation(.smooth(duration: 0.24), value: isShowingCompletionMessage)
     }
 
@@ -204,6 +235,8 @@ struct SudokuBoardView: View {
 
     private func requestNewBoard() {
         isShowingCompletionMessage = false
+        isShowingLeaderboard = false
+        newBoardIntent = .newRun
         isConfirmingNewBoard = true
         recordUITestState()
     }
@@ -211,14 +244,41 @@ struct SudokuBoardView: View {
     private func confirmNewBoard() {
         isShowingCompletionMessage = false
         isConfirmingNewBoard = false
-        store.generateNewBoard()
+        switch newBoardIntent {
+        case .newRun, .gameOverRestart:
+            store.startNewRun()
+        case .nextLevel:
+            store.advanceToNextLevel()
+        }
         wasComplete = store.game.isComplete
         recordUITestState()
     }
 
     private func cancelNewBoard() {
         isShowingCompletionMessage = false
+        if store.isGameOver {
+            isEnteringLeaderboard = true
+        }
         isConfirmingNewBoard = false
+        recordUITestState()
+    }
+
+    private func submitLeaderboardEntry(_ initials: String) {
+        store.submitLeaderboardEntry(initials: initials)
+        isEnteringLeaderboard = false
+        newBoardIntent = .gameOverRestart
+        isConfirmingNewBoard = true
+        recordUITestState()
+    }
+
+    private func showLeaderboard() {
+        isShowingCompletionMessage = false
+        isShowingLeaderboard = true
+        recordUITestState()
+    }
+
+    private func hideLeaderboard() {
+        isShowingLeaderboard = false
         recordUITestState()
     }
 
@@ -226,8 +286,11 @@ struct SudokuBoardView: View {
         UITestProbe.record(
             snapshot: store.snapshot(),
             isConfirmingNewBoard: isConfirmingNewBoard,
+            isEnteringLeaderboard: isEnteringLeaderboard,
+            isShowingLeaderboard: isShowingLeaderboard,
             isShowingCompletionMessage: isShowingCompletionMessage,
             isGameOver: store.isGameOver,
+            leaderboardEntries: store.leaderboardEntries,
             sparkleTriggerCount: sparkleTriggerCount
         )
     }
@@ -255,8 +318,15 @@ struct SudokuBoardView: View {
             guard store.game.isComplete, !store.isGameOver else { return }
 
             isShowingCompletionMessage = false
+            newBoardIntent = .nextLevel
             isConfirmingNewBoard = true
             recordUITestState()
         }
     }
+}
+
+private enum NewBoardIntent {
+    case newRun
+    case nextLevel
+    case gameOverRestart
 }

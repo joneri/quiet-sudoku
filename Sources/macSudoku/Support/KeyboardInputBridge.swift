@@ -44,6 +44,10 @@ final class KeyboardInputView: NSView {
         guard monitor == nil else { return }
 
         monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard !Self.isTextInputActive(in: event.window) else {
+                return event
+            }
+
             guard let self, let input = self.input(from: event), self.onInput?(input) == true else {
                 return event
             }
@@ -60,7 +64,11 @@ final class KeyboardInputView: NSView {
 
     func requestFocus() {
         DispatchQueue.main.async { [weak self] in
-            guard let self, self.window?.firstResponder !== self else { return }
+            guard
+                let self,
+                self.window?.firstResponder == nil || self.window?.firstResponder === self
+            else { return }
+
             self.window?.makeFirstResponder(self)
         }
     }
@@ -100,5 +108,11 @@ final class KeyboardInputView: NSView {
         }
 
         return nil
+    }
+
+    private static func isTextInputActive(in window: NSWindow?) -> Bool {
+        guard let firstResponder = window?.firstResponder else { return false }
+
+        return firstResponder is NSTextView || firstResponder is NSTextField
     }
 }

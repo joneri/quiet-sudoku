@@ -3,35 +3,25 @@
   "mode": "Auto",
   "cost_profile": "Cost Control",
   "epic": {
-    "title": "Candidate locking, inline lock actions, and lives",
-    "status": "closed"
+    "title": "Levels and local leaderboard",
+    "status": "final_review"
   },
   "current_role": "PO",
-  "current_gate": "closed",
+  "current_gate": "E",
   "increments": [
     {
-      "id": "LOCK-001",
-      "title": "Floating candidates, lock button, and lives",
+      "id": "LEVEL-001",
+      "title": "Playable levels with Game Over leaderboard entry",
       "status": "accepted"
     },
     {
-      "id": "LOCK-002",
-      "title": "Stronger floating candidate styling",
+      "id": "LEVEL-002",
+      "title": "Obvious high-score entry and top-shelf scores access",
       "status": "accepted"
     },
     {
-      "id": "LOCK-003",
-      "title": "Game Over at zero lives",
-      "status": "accepted"
-    },
-    {
-      "id": "LOCK-004",
-      "title": "Inline candidate locks, Lock all, and three-life baseline",
-      "status": "accepted"
-    },
-    {
-      "id": "LOCK-005",
-      "title": "Completion congratulations and new-board prompt",
+      "id": "LEVEL-003",
+      "title": "Level difficulty ramp verification",
       "status": "accepted"
     }
   ]

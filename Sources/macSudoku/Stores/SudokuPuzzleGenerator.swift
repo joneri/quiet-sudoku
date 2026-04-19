@@ -1,15 +1,13 @@
 import Foundation
 
 struct SudokuPuzzleGenerator {
-    var filledCellCount = 34
-
-    func generate() -> SudokuPuzzle {
+    func generate(level: SudokuLevel = SudokuLevel(1)) -> SudokuPuzzle {
         let solution = shuffledSolution()
         var puzzle = solution
         var positions = Array(0..<81)
         positions.shuffle()
 
-        for position in positions.dropFirst(filledCellCount) {
+        for position in positions.dropFirst(level.filledCellCount) {
             puzzle[position / 9][position % 9] = 0
         }
 
@@ -31,4 +29,3 @@ struct SudokuPuzzleGenerator {
         }
     }
 }
-

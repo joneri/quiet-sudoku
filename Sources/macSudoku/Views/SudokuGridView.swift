@@ -13,6 +13,9 @@ struct SudokuGridView: View {
     var body: some View {
         GeometryReader { proxy in
             let side = min(proxy.size.width, proxy.size.height)
+            let cellSide = side / 9
+            let lockButtonSide = min(max(cellSide * 0.42, 14), 24)
+            let lockButtonPadding = min(max(cellSide * 0.08, 2), 5)
 
             VStack(spacing: 0) {
                 ForEach(0..<9, id: \.self) { row in
@@ -38,10 +41,10 @@ struct SudokuGridView: View {
                                 .accessibilityIdentifier("sudoku-cell-\(row)-\(column)")
 
                                 if cell.hasCandidate {
-                                    CandidateLockButton {
+                                    CandidateLockButton(size: lockButtonSide) {
                                         onLockCandidate(cell.id)
                                     }
-                                    .padding(5)
+                                    .padding(lockButtonPadding)
                                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                                     .accessibilityLabel("Lock cell row \(row + 1) column \(column + 1)")
                                     .accessibilityIdentifier("lock-candidate-cell-\(row)-\(column)")
@@ -84,18 +87,19 @@ struct SudokuGridView: View {
 }
 
 private struct CandidateLockButton: View {
+    let size: CGFloat
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Image(systemName: "arrow.down.to.line.compact")
-                .font(.system(size: 11, weight: .bold))
+                .font(.system(size: max(size * 0.46, 7), weight: .bold))
                 .foregroundStyle(Color.white.opacity(0.95))
-                .frame(width: 24, height: 24)
+                .frame(width: size, height: size)
                 .background {
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .fill(Color.green.opacity(0.72))
-                        .shadow(color: Color.black.opacity(0.32), radius: 7, y: 4)
+                        .shadow(color: Color.black.opacity(0.32), radius: min(size * 0.30, 7), y: min(size * 0.18, 4))
                 }
                 .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
