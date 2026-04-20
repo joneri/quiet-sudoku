@@ -108,10 +108,10 @@ if [[ -n "$PROFILE_PATH" && -f "$PROFILE_PATH" && -n "$SIGNING_IDENTITY" ]]; the
     MACSUDOKU_PROVISIONING_PROFILE_PATH="$PROFILE_PATH" \
     "$ROOT_DIR/script/build_and_run.sh" --build >/dev/null; then
     signed_entitlements="$(codesign -d --entitlements :- "$ROOT_DIR/dist/$APP_NAME.app" 2>/dev/null || true)"
-    expected_app_identifier="$(
-      security cms -D -i "$PROFILE_PATH" |
-        /usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.application-identifier' /dev/stdin 2>/dev/null || true
-    )"
+    profile_plist="$(mktemp)"
+    security cms -D -i "$PROFILE_PATH" >"$profile_plist"
+    expected_app_identifier="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.application-identifier' "$profile_plist" 2>/dev/null || true)"
+    rm -f "$profile_plist"
 
     if [[ -n "$expected_app_identifier" && "$signed_entitlements" == *"$expected_app_identifier"* ]]; then
       pass "signed app application identifier matches provisioning profile"
