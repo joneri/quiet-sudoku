@@ -103,6 +103,26 @@ else
   rm -f "$profile_plist"
 fi
 
+if [[ -n "$PROFILE_PATH" && -f "$PROFILE_PATH" && -n "$SIGNING_IDENTITY" ]]; then
+  if MACSUDOKU_SIGNING_IDENTITY="$SIGNING_IDENTITY" \
+    MACSUDOKU_PROVISIONING_PROFILE_PATH="$PROFILE_PATH" \
+    "$ROOT_DIR/script/build_and_run.sh" --build >/dev/null; then
+    signed_entitlements="$(codesign -d --entitlements :- "$ROOT_DIR/dist/$APP_NAME.app" 2>/dev/null || true)"
+    expected_app_identifier="$(
+      security cms -D -i "$PROFILE_PATH" |
+        /usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.application-identifier' /dev/stdin 2>/dev/null || true
+    )"
+
+    if [[ -n "$expected_app_identifier" && "$signed_entitlements" == *"$expected_app_identifier"* ]]; then
+      pass "signed app application identifier matches provisioning profile"
+    else
+      fail "signed app is missing the provisioning profile application identifier"
+    fi
+  else
+    fail "could not build a signed app with the provisioning profile"
+  fi
+fi
+
 if ((${#auth_args[@]})); then
   list_args=(--list-apps --filter-bundle-id "$BUNDLE_ID" --filter-platform macos --output-format json)
   [[ -n "$ASC_PROVIDER_PUBLIC_ID" ]] && list_args+=(--provider-public-id "$ASC_PROVIDER_PUBLIC_ID")
