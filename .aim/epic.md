@@ -1,11 +1,11 @@
-# Epic: Lock all availability
+# Epic: Game Over visibility
 
 Mode: Strict
 Cost profile: Cost Control
 
-Make the Lock all button communicate when it is useful.
+Ensure the Game Over message is visible before the new-board confirmation appears.
 
 Desired behavior:
-- Lock all is greyed out and unavailable when fewer than two floating candidate numbers exist.
-- Lock all becomes available when two or more candidate numbers exist.
-- The store should also guard against accidental lock-all execution while disabled.
+- When the player loses all lives and no initials entry is needed, show Game Over on its own first.
+- After a short readable pause, show the new-board confirmation dialog.
+- Keep the existing high score initials Game Over flow working.

@@ -281,8 +281,21 @@ struct SudokuBoardView: View {
         if store.shouldPromptForGameOverLeaderboard() {
             isEnteringLeaderboard = true
         } else {
-            newBoardIntent = .gameOverRestart
+            showGameOverMessageThenPrompt()
+        }
+    }
+
+    private func showGameOverMessageThenPrompt() {
+        newBoardIntent = .gameOverRestart
+        isConfirmingNewBoard = false
+        recordUITestState()
+
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_300_000_000)
+            guard store.isGameOver, !isEnteringLeaderboard else { return }
+
             isConfirmingNewBoard = true
+            recordUITestState()
         }
     }
 

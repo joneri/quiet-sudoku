@@ -3,15 +3,15 @@
   "mode": "Strict",
   "cost_profile": "Cost Control",
   "epic": {
-    "title": "Lock all availability",
+    "title": "Game Over visibility",
     "status": "final_review"
   },
   "current_role": "PO",
   "current_gate": "E",
   "increments": [
     {
-      "id": "LOCKALL-001",
-      "title": "Disable Lock all below two candidates",
+      "id": "GAMEOVER-001",
+      "title": "Delay new-board prompt until Game Over is visible",
       "status": "accepted"
     }
   ]
