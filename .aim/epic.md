@@ -1,12 +1,11 @@
-# Epic: Life loss feedback
+# Epic: Lock all availability
 
 Mode: Strict
 Cost profile: Cost Control
 
-Make a lost heart visibly noticeable without disrupting the calm glass Sudoku experience.
+Make the Lock all button communicate when it is useful.
 
 Desired behavior:
-- When a wrong lock costs a life, the screen should briefly react.
-- The effect should feel like a soft red shimmer around the board edges.
-- A subtle shake is acceptable if it remains lightweight.
-- Correct locks and normal number entry should not trigger the effect.
+- Lock all is greyed out and unavailable when fewer than two floating candidate numbers exist.
+- Lock all becomes available when two or more candidate numbers exist.
+- The store should also guard against accidental lock-all execution while disabled.

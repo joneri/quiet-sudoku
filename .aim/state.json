@@ -3,15 +3,15 @@
   "mode": "Strict",
   "cost_profile": "Cost Control",
   "epic": {
-    "title": "Life loss feedback",
+    "title": "Lock all availability",
     "status": "final_review"
   },
   "current_role": "PO",
   "current_gate": "E",
   "increments": [
     {
-      "id": "LIFEFX-001",
-      "title": "Red edge shimmer when a life is lost",
+      "id": "LOCKALL-001",
+      "title": "Disable Lock all below two candidates",
       "status": "accepted"
     }
   ]

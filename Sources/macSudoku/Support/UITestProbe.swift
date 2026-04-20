@@ -19,6 +19,7 @@ enum UITestProbe {
         leaderboardInitials: String?,
         leaderboardUpdateCount: Int,
         lifeLossFeedbackTriggerCount: Int,
+        isLockAllEnabled: Bool,
         sparkleTriggerCount: Int
     ) {
         guard let statePath else { return }
@@ -64,6 +65,7 @@ enum UITestProbe {
                 ]
             }
         }
+        let candidateCellCount = snapshot.normalizedCandidateValues.compactMap { $0 }.count
         let progression = snapshot.progression
         let edgeLightEndpoints = SudokuBoardEdgeCompletionLightsView(
             progression: progression,
@@ -83,6 +85,7 @@ enum UITestProbe {
         let payload: [String: Any] = [
             "selected": selected,
             "boardSize": snapshot.boardSize.rawValue,
+            "candidateCellCount": candidateCellCount,
             "completedBlocks": Array(progression.completedBlocks).sorted(),
             "completedColumns": Array(progression.completedColumns).sorted(),
             "completedDigits": Array(progression.completedDigits).sorted(),
@@ -95,6 +98,7 @@ enum UITestProbe {
             "isConfirmingNewBoard": isConfirmingNewBoard,
             "isEnteringLeaderboard": isEnteringLeaderboard,
             "isGameOver": isGameOver,
+            "isLockAllEnabled": isLockAllEnabled,
             "isShowingLeaderboard": isShowingLeaderboard,
             "isShowingCompletionMessage": isShowingCompletionMessage,
             "leaderboardEntries": leaderboardEntries.map { entry in

@@ -5,6 +5,7 @@ struct SudokuTopBarView: View {
     let livesRemaining: Int
     let level: SudokuLevel
     let leaderboardUpdateCount: Int
+    let isLockAllEnabled: Bool
     let onCycleBoardSize: () -> Void
     let onLockAllCandidates: () -> Void
     let onRequestNewBoard: () -> Void
@@ -102,14 +103,16 @@ struct SudokuTopBarView: View {
         Button(action: onLockAllCandidates) {
             Text("Lock all")
                 .font(.system(size: metrics.buttonFontSize, weight: .medium, design: .rounded))
-                .foregroundStyle(.primary)
+                .foregroundStyle(.primary.opacity(isLockAllEnabled ? 1 : 0.34))
                 .frame(width: metrics.lockButtonWidth, height: metrics.buttonHeight)
                 .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }
         .buttonStyle(.plain)
+        .disabled(!isLockAllEnabled)
         .accessibilityLabel("Lock all numbers")
+        .accessibilityValue(isLockAllEnabled ? "Available" : "Unavailable")
         .accessibilityIdentifier("lock-all-candidates-button")
-        .background(buttonBackground)
+        .background(buttonBackground.opacity(isLockAllEnabled ? 1 : 0.48))
     }
 
     private func leaderboardButton(metrics: TopBarMetrics) -> some View {

@@ -39,7 +39,7 @@ snapshot = {
         "solution": solution,
     },
     "values": [None for _ in range(81)],
-    "candidateValues": [None for _ in range(81)],
+    "candidateValues": [None if index != 1 else 3 for index in range(81)],
     "selectedCellID": 0,
     "boardSize": "large",
     "livesRemaining": 3,
@@ -175,14 +175,14 @@ tell application "System Events" to keystroke "$text"
 OSA
 }
 
-wait_for_state 'state["livesRemaining"] == 3 and state["lifeLossFeedbackTriggerCount"] == 0 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] is None' "initial lock test state"
+wait_for_state 'state["livesRemaining"] == 3 and state["candidateCellCount"] == 1 and state["isLockAllEnabled"] == False and state["lifeLossFeedbackTriggerCount"] == 0 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] is None' "initial lock test state with Lock all disabled for one candidate"
 send_text "2"
-wait_for_state 'state["livesRemaining"] == 3 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 2' "wrong candidate floats without counting"
+wait_for_state 'state["livesRemaining"] == 3 and state["candidateCellCount"] == 2 and state["isLockAllEnabled"] == True and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 2' "second floating candidate enables Lock all without counting"
 press_accessibility_button "lock-candidate-cell-0-0"
-wait_for_state 'state["livesRemaining"] == 2 and state["lifeLossFeedbackTriggerCount"] == 1 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 2' "wrong cell lock loses one life, triggers feedback, and keeps candidate unlocked"
+wait_for_state 'state["livesRemaining"] == 2 and state["isLockAllEnabled"] == True and state["lifeLossFeedbackTriggerCount"] == 1 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 2' "wrong cell lock loses one life, triggers feedback, and keeps candidate unlocked"
 send_text "1"
-wait_for_state 'state["livesRemaining"] == 2 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 1' "correct candidate floats before lock"
+wait_for_state 'state["livesRemaining"] == 2 and state["isLockAllEnabled"] == True and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 1' "correct candidate floats before lock"
 press_accessibility_button "lock-candidate-cell-0-0"
-wait_for_state 'state["livesRemaining"] == 2 and cell(0, 0)["value"] == 1 and cell(0, 0)["candidateValue"] is None' "correct cell lock commits value without losing another life"
+wait_for_state 'state["livesRemaining"] == 2 and state["candidateCellCount"] == 1 and state["isLockAllEnabled"] == False and cell(0, 0)["value"] == 1 and cell(0, 0)["candidateValue"] is None' "correct cell lock commits value and disables Lock all again"
 
-echo "Lock/lives smoke test passed: candidates float, wrong locks cost a life with feedback, correct locks commit."
+echo "Lock/lives smoke test passed: Lock all is disabled below two candidates, wrong locks cost a life with feedback, correct locks commit."

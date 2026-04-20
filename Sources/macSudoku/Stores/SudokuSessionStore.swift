@@ -22,6 +22,14 @@ final class SudokuSessionStore {
         livesRemaining == 0
     }
 
+    var candidateCellCount: Int {
+        game.candidateCellIDs.count
+    }
+
+    var canLockAllCandidates: Bool {
+        candidateCellCount >= 2 && !isGameOver
+    }
+
     init(
         generator: SudokuPuzzleGenerator = SudokuPuzzleGenerator(),
         persistence: SudokuGamePersistence = SudokuGamePersistence(),
@@ -107,7 +115,7 @@ final class SudokuSessionStore {
     }
 
     func lockAllCandidates() {
-        guard !isGameOver else { return }
+        guard canLockAllCandidates else { return }
 
         for cellID in game.candidateCellIDs {
             guard !isGameOver else { break }

@@ -26,6 +26,7 @@ struct SudokuBoardView: View {
                         livesRemaining: store.livesRemaining,
                         level: store.level,
                         leaderboardUpdateCount: store.leaderboardUpdateCount,
+                        isLockAllEnabled: store.canLockAllCandidates,
                         onCycleBoardSize: cycleBoardSize,
                         onLockAllCandidates: lockAllCandidates,
                         onRequestNewBoard: requestNewBoard,
@@ -316,6 +317,7 @@ struct SudokuBoardView: View {
             leaderboardInitials: store.leaderboardInitials,
             leaderboardUpdateCount: store.leaderboardUpdateCount,
             lifeLossFeedbackTriggerCount: lifeLossFeedbackTriggerCount,
+            isLockAllEnabled: store.canLockAllCandidates,
             sparkleTriggerCount: sparkleTriggerCount
         )
     }
