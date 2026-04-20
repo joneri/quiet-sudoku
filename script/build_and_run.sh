@@ -21,6 +21,7 @@ APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
 DEFAULT_ENTITLEMENTS="$ROOT_DIR/Config/macSudoku.entitlements"
+GENERATED_ENTITLEMENTS="$DIST_DIR/$APP_NAME.generated.entitlements"
 APP_ICON_SOURCE="$ROOT_DIR/Config/macSudoku.icns"
 APP_ICON_NAME="macSudoku.icns"
 
@@ -85,6 +86,42 @@ sign_app_if_requested() {
 
   if [[ -z "$SIGNING_IDENTITY" && "$AD_HOC_SIGN" != "1" ]]; then
     return 0
+  fi
+
+  if [[ -n "$PROVISIONING_PROFILE_PATH" ]]; then
+    local profile_plist
+    profile_plist="$(mktemp)"
+    security cms -D -i "$PROVISIONING_PROFILE_PATH" >"$profile_plist"
+
+    local app_identifier
+    local team_identifier
+    local keychain_group
+    app_identifier="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.application-identifier' "$profile_plist")"
+    team_identifier="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.team-identifier' "$profile_plist")"
+    keychain_group="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:keychain-access-groups:0' "$profile_plist")"
+    rm -f "$profile_plist"
+
+    cat >"$GENERATED_ENTITLEMENTS" <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>com.apple.application-identifier</key>
+  <string>$app_identifier</string>
+  <key>com.apple.developer.team-identifier</key>
+  <string>$team_identifier</string>
+  <key>com.apple.security.app-sandbox</key>
+  <true/>
+  <key>com.apple.security.files.user-selected.read-write</key>
+  <true/>
+  <key>keychain-access-groups</key>
+  <array>
+    <string>$keychain_group</string>
+  </array>
+</dict>
+</plist>
+PLIST
+    entitlements="$GENERATED_ENTITLEMENTS"
   fi
 
   local identity="$SIGNING_IDENTITY"
