@@ -175,14 +175,14 @@ tell application "System Events" to keystroke "$text"
 OSA
 }
 
-wait_for_state 'state["livesRemaining"] == 3 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] is None' "initial lock test state"
+wait_for_state 'state["livesRemaining"] == 3 and state["lifeLossFeedbackTriggerCount"] == 0 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] is None' "initial lock test state"
 send_text "2"
 wait_for_state 'state["livesRemaining"] == 3 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 2' "wrong candidate floats without counting"
 press_accessibility_button "lock-candidate-cell-0-0"
-wait_for_state 'state["livesRemaining"] == 2 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 2' "wrong cell lock loses one life and keeps candidate unlocked"
+wait_for_state 'state["livesRemaining"] == 2 and state["lifeLossFeedbackTriggerCount"] == 1 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 2' "wrong cell lock loses one life, triggers feedback, and keeps candidate unlocked"
 send_text "1"
 wait_for_state 'state["livesRemaining"] == 2 and cell(0, 0)["value"] is None and cell(0, 0)["candidateValue"] == 1' "correct candidate floats before lock"
 press_accessibility_button "lock-candidate-cell-0-0"
 wait_for_state 'state["livesRemaining"] == 2 and cell(0, 0)["value"] == 1 and cell(0, 0)["candidateValue"] is None' "correct cell lock commits value without losing another life"
 
-echo "Lock/lives smoke test passed: candidates float, wrong locks cost a life, correct locks commit."
+echo "Lock/lives smoke test passed: candidates float, wrong locks cost a life with feedback, correct locks commit."

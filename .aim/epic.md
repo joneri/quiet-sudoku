@@ -1,14 +1,12 @@
-# Epic: Continuous high score progression
+# Epic: Life loss feedback
 
-Mode: Auto
+Mode: Strict
 Cost profile: Cost Control
 
-Make the high score system reward players who keep winning level after level.
+Make a lost heart visibly noticeable without disrupting the calm glass Sudoku experience.
 
 Desired behavior:
-- A player can be asked for initials after a completed level when they qualify and are not already part of the current run's high score identity.
-- Once initials are known, later completed levels update that same high score automatically.
-- The leaderboard keeps only the highest 15 scores.
-- The Scores button gives a soft pleasant animation whenever the leaderboard changes.
-
-The implementation must preserve the existing Game Over high score flow and keep the code readable, componentized, and testable.
+- When a wrong lock costs a life, the screen should briefly react.
+- The effect should feel like a soft red shimmer around the board edges.
+- A subtle shake is acceptable if it remains lightweight.
+- Correct locks and normal number entry should not trigger the effect.

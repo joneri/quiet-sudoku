@@ -18,6 +18,7 @@ enum UITestProbe {
         leaderboardEntries: [LeaderboardEntry],
         leaderboardInitials: String?,
         leaderboardUpdateCount: Int,
+        lifeLossFeedbackTriggerCount: Int,
         sparkleTriggerCount: Int
     ) {
         guard let statePath else { return }
@@ -104,6 +105,7 @@ enum UITestProbe {
             },
             "leaderboardInitials": leaderboardInitials ?? NSNull(),
             "leaderboardUpdateCount": leaderboardUpdateCount,
+            "lifeLossFeedbackTriggerCount": lifeLossFeedbackTriggerCount,
             "level": snapshot.level.number,
             "levelsCompleted": snapshot.level.completedCountBeforeLevel,
             "livesRemaining": snapshot.livesRemaining,

@@ -8,6 +8,7 @@ struct SudokuBoardView: View {
     @State private var isShowingLeaderboard = false
     @State private var newBoardIntent: NewBoardIntent = .newRun
     @State private var sparkleTriggerCount = 0
+    @State private var lifeLossFeedbackTriggerCount = 0
     @State private var wasComplete = false
 
     init(store: SudokuSessionStore = SudokuSessionStore()) {
@@ -46,6 +47,8 @@ struct SudokuBoardView: View {
                     boardSide: store.boardSize.boardSide,
                     topInset: BoardSize.topBarHeight
                 )
+
+                LifeLossFeedbackView(triggerCount: lifeLossFeedbackTriggerCount)
 
                 if store.isGameOver {
                     gameOverOverlay
@@ -112,7 +115,11 @@ struct SudokuBoardView: View {
             }
             recordUITestState()
         }
-        .onChange(of: store.livesRemaining) { _, livesRemaining in
+        .onChange(of: store.livesRemaining) { previousLives, livesRemaining in
+            if livesRemaining < previousLives {
+                lifeLossFeedbackTriggerCount += 1
+            }
+
             if livesRemaining == 0 {
                 isShowingCompletionMessage = false
                 isConfirmingNewBoard = false
@@ -308,6 +315,7 @@ struct SudokuBoardView: View {
             leaderboardEntries: store.leaderboardEntries,
             leaderboardInitials: store.leaderboardInitials,
             leaderboardUpdateCount: store.leaderboardUpdateCount,
+            lifeLossFeedbackTriggerCount: lifeLossFeedbackTriggerCount,
             sparkleTriggerCount: sparkleTriggerCount
         )
     }

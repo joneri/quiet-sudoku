@@ -1,17 +1,17 @@
 {
   "aim_version": "1.6",
-  "mode": "Auto",
+  "mode": "Strict",
   "cost_profile": "Cost Control",
   "epic": {
-    "title": "Continuous high score progression",
+    "title": "Life loss feedback",
     "status": "final_review"
   },
   "current_role": "PO",
   "current_gate": "E",
   "increments": [
     {
-      "id": "HIGHSCORE-001",
-      "title": "Continuous run high score identity and update feedback",
+      "id": "LIFEFX-001",
+      "title": "Red edge shimmer when a life is lost",
       "status": "accepted"
     }
   ]
