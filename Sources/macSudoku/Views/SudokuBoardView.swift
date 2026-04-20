@@ -24,6 +24,7 @@ struct SudokuBoardView: View {
                         boardSize: store.boardSize,
                         livesRemaining: store.livesRemaining,
                         level: store.level,
+                        leaderboardUpdateCount: store.leaderboardUpdateCount,
                         onCycleBoardSize: cycleBoardSize,
                         onLockAllCandidates: lockAllCandidates,
                         onRequestNewBoard: requestNewBoard,
@@ -55,7 +56,8 @@ struct SudokuBoardView: View {
                         .ignoresSafeArea()
 
                     LeaderboardEntryView(
-                        levelsCompleted: store.levelsCompleted,
+                        title: store.isGameOver ? "Game Over" : "High Score",
+                        levelsCompleted: leaderboardPromptScore,
                         entries: store.leaderboardEntries,
                         onSubmit: submitLeaderboardEntry
                     )
@@ -106,7 +108,7 @@ struct SudokuBoardView: View {
         .onAppear {
             wasComplete = store.game.isComplete
             if store.isGameOver {
-                isEnteringLeaderboard = true
+                prepareGameOverNextStep()
             }
             recordUITestState()
         }
@@ -114,7 +116,7 @@ struct SudokuBoardView: View {
             if livesRemaining == 0 {
                 isShowingCompletionMessage = false
                 isConfirmingNewBoard = false
-                isEnteringLeaderboard = true
+                prepareGameOverNextStep()
             }
             recordUITestState()
         }
@@ -188,6 +190,10 @@ struct SudokuBoardView: View {
         .accessibilityIdentifier("game-over-overlay")
     }
 
+    private var leaderboardPromptScore: Int {
+        store.game.isComplete ? store.completedLevelScore : store.levelsCompleted
+    }
+
     private var completionOverlay: some View {
         Text("Congratulations!")
             .font(.system(size: 42, weight: .black, design: .rounded))
@@ -257,16 +263,25 @@ struct SudokuBoardView: View {
     private func cancelNewBoard() {
         isShowingCompletionMessage = false
         if store.isGameOver {
-            isEnteringLeaderboard = true
+            prepareGameOverNextStep()
         }
         isConfirmingNewBoard = false
         recordUITestState()
     }
 
+    private func prepareGameOverNextStep() {
+        if store.shouldPromptForGameOverLeaderboard() {
+            isEnteringLeaderboard = true
+        } else {
+            newBoardIntent = .gameOverRestart
+            isConfirmingNewBoard = true
+        }
+    }
+
     private func submitLeaderboardEntry(_ initials: String) {
         store.submitLeaderboardEntry(initials: initials)
         isEnteringLeaderboard = false
-        newBoardIntent = .gameOverRestart
+        newBoardIntent = store.isGameOver ? .gameOverRestart : .nextLevel
         isConfirmingNewBoard = true
         recordUITestState()
     }
@@ -291,6 +306,8 @@ struct SudokuBoardView: View {
             isShowingCompletionMessage: isShowingCompletionMessage,
             isGameOver: store.isGameOver,
             leaderboardEntries: store.leaderboardEntries,
+            leaderboardInitials: store.leaderboardInitials,
+            leaderboardUpdateCount: store.leaderboardUpdateCount,
             sparkleTriggerCount: sparkleTriggerCount
         )
     }
@@ -304,6 +321,7 @@ struct SudokuBoardView: View {
         if isComplete && !wasComplete {
             store.awardCompletionLife()
             triggerSparkle()
+            _ = store.recordCompletedLevelForActiveLeaderboardPlayer()
             showCompletionMessageThenPrompt()
         }
         wasComplete = isComplete
@@ -318,8 +336,12 @@ struct SudokuBoardView: View {
             guard store.game.isComplete, !store.isGameOver else { return }
 
             isShowingCompletionMessage = false
-            newBoardIntent = .nextLevel
-            isConfirmingNewBoard = true
+            if store.shouldPromptForCompletedLevelLeaderboard() {
+                isEnteringLeaderboard = true
+            } else {
+                newBoardIntent = .nextLevel
+                isConfirmingNewBoard = true
+            }
             recordUITestState()
         }
     }

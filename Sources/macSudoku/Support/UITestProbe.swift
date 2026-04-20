@@ -16,6 +16,8 @@ enum UITestProbe {
         isShowingCompletionMessage: Bool,
         isGameOver: Bool,
         leaderboardEntries: [LeaderboardEntry],
+        leaderboardInitials: String?,
+        leaderboardUpdateCount: Int,
         sparkleTriggerCount: Int
     ) {
         guard let statePath else { return }
@@ -100,6 +102,8 @@ enum UITestProbe {
                     "levelsCompleted": entry.levelsCompleted
                 ] as [String: Any]
             },
+            "leaderboardInitials": leaderboardInitials ?? NSNull(),
+            "leaderboardUpdateCount": leaderboardUpdateCount,
             "level": snapshot.level.number,
             "levelsCompleted": snapshot.level.completedCountBeforeLevel,
             "livesRemaining": snapshot.livesRemaining,

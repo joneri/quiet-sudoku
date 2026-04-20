@@ -16,8 +16,8 @@ struct LeaderboardListView: View {
                     .foregroundStyle(.secondary)
                     .frame(width: 170, height: 70)
             } else {
-                VStack(spacing: 7) {
-                    ForEach(Array(entries.prefix(8).enumerated()), id: \.element.id) { index, entry in
+                VStack(spacing: entries.count > 8 ? 4 : 7) {
+                    ForEach(Array(entries.prefix(15).enumerated()), id: \.element.id) { index, entry in
                         HStack {
                             Text("\(index + 1).")
                                 .frame(width: 24, alignment: .leading)
@@ -27,7 +27,7 @@ struct LeaderboardListView: View {
                             Text("\(entry.levelsCompleted)")
                                 .monospacedDigit()
                         }
-                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                        .font(.system(size: entries.count > 8 ? 11 : 13, weight: .semibold, design: .rounded))
                     }
                 }
                 .frame(width: 170)

@@ -3,15 +3,15 @@
   "mode": "Auto",
   "cost_profile": "Cost Control",
   "epic": {
-    "title": "Prepare Mac App Store export and upload path",
+    "title": "Continuous high score progression",
     "status": "final_review"
   },
   "current_role": "PO",
   "current_gate": "E",
   "increments": [
     {
-      "id": "APPSTORE-001",
-      "title": "Provisioning, package export, and App Store Connect upload preflight",
+      "id": "HIGHSCORE-001",
+      "title": "Continuous run high score identity and update feedback",
       "status": "accepted"
     }
   ]

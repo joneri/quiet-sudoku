@@ -1,14 +1,14 @@
-# Epic: Prepare Mac App Store export and upload path
+# Epic: Continuous high score progression
 
 Mode: Auto
 Cost profile: Cost Control
 
-Prepare the macOS Sudoku app for the next Apple distribution step after local Apple Distribution signing has passed.
+Make the high score system reward players who keep winning level after level.
 
-The Epic focuses on:
-- Mac App Store provisioning profile readiness
-- App Store Connect app record verification
-- signed installer package export path
-- App Store Connect validation/upload command path
+Desired behavior:
+- A player can be asked for initials after a completed level when they qualify and are not already part of the current run's high score identity.
+- Once initials are known, later completed levels update that same high score automatically.
+- The leaderboard keeps only the highest 15 scores.
+- The Scores button gives a soft pleasant animation whenever the leaderboard changes.
 
-Human-owned Apple account actions must be reduced to exact blockers when Codex cannot complete them locally.
+The implementation must preserve the existing Game Over high score flow and keep the code readable, componentized, and testable.

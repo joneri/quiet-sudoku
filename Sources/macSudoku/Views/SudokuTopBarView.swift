@@ -4,10 +4,13 @@ struct SudokuTopBarView: View {
     let boardSize: BoardSize
     let livesRemaining: Int
     let level: SudokuLevel
+    let leaderboardUpdateCount: Int
     let onCycleBoardSize: () -> Void
     let onLockAllCandidates: () -> Void
     let onRequestNewBoard: () -> Void
     let onShowLeaderboard: () -> Void
+
+    @State private var isPulsingLeaderboardButton = false
 
     var body: some View {
         GeometryReader { proxy in
@@ -43,6 +46,14 @@ struct SudokuTopBarView: View {
             }
         }
         .frame(height: BoardSize.topBarHeight)
+        .onChange(of: leaderboardUpdateCount) { _, updateCount in
+            guard updateCount > 0 else { return }
+            isPulsingLeaderboardButton = true
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 950_000_000)
+                isPulsingLeaderboardButton = false
+            }
+        }
     }
 
     private func newBoardButton(metrics: TopBarMetrics) -> some View {
@@ -112,7 +123,7 @@ struct SudokuTopBarView: View {
         .buttonStyle(.plain)
         .accessibilityLabel("High scores")
         .accessibilityIdentifier("show-leaderboard-button")
-        .background(buttonBackground)
+        .background(leaderboardButtonBackground)
     }
 
 
@@ -143,6 +154,25 @@ struct SudokuTopBarView: View {
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .strokeBorder(Color.white.opacity(0.22), lineWidth: 1)
             }
+    }
+
+    private var leaderboardButtonBackground: some View {
+        RoundedRectangle(cornerRadius: 8, style: .continuous)
+            .fill(.regularMaterial)
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(
+                        isPulsingLeaderboardButton ? Color.green.opacity(0.88) : Color.white.opacity(0.22),
+                        lineWidth: isPulsingLeaderboardButton ? 2 : 1
+                    )
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(Color.green.opacity(isPulsingLeaderboardButton ? 0.20 : 0))
+                    .blendMode(.plusLighter)
+            }
+            .shadow(color: Color.green.opacity(isPulsingLeaderboardButton ? 0.62 : 0), radius: isPulsingLeaderboardButton ? 12 : 0)
+            .animation(.smooth(duration: 0.35), value: isPulsingLeaderboardButton)
     }
 }
 

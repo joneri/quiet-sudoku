@@ -15,6 +15,8 @@ final class SudokuSessionStore {
     var livesRemaining: Int
     var level: SudokuLevel
     var leaderboardEntries: [LeaderboardEntry]
+    var leaderboardInitials: String?
+    var leaderboardUpdateCount = 0
 
     var isGameOver: Bool {
         livesRemaining == 0
@@ -36,6 +38,7 @@ final class SudokuSessionStore {
             boardSize = snapshot.boardSize
             livesRemaining = snapshot.livesRemaining
             level = snapshot.level
+            leaderboardInitials = snapshot.leaderboardInitials
         } else {
             let startingLevel = SudokuLevel(1)
             level = startingLevel
@@ -43,6 +46,7 @@ final class SudokuSessionStore {
             selectedCell = nil
             boardSize = .large
             livesRemaining = Self.startingLives
+            leaderboardInitials = nil
         }
 
         ensureSelection()
@@ -124,6 +128,7 @@ final class SudokuSessionStore {
         game = SudokuGame(puzzle: generator.generate(level: level))
         selectedCell = game.firstEditableCellID
         livesRemaining = Self.startingLives
+        leaderboardInitials = nil
         save()
     }
 
@@ -149,12 +154,56 @@ final class SudokuSessionStore {
         level.completedCountBeforeLevel
     }
 
+    var completedLevelScore: Int {
+        level.number
+    }
+
+    func shouldPromptForCompletedLevelLeaderboard() -> Bool {
+        guard leaderboardInitials == nil else { return false }
+        return leaderboardStore.qualifies(levelsCompleted: completedLevelScore, against: leaderboardEntries)
+    }
+
+    func shouldPromptForGameOverLeaderboard() -> Bool {
+        guard leaderboardInitials == nil else { return false }
+        return leaderboardStore.qualifies(levelsCompleted: levelsCompleted, against: leaderboardEntries)
+    }
+
+    @discardableResult
+    func recordCompletedLevelForActiveLeaderboardPlayer() -> Bool {
+        guard let leaderboardInitials else { return false }
+        return saveLeaderboardEntry(initials: leaderboardInitials, levelsCompleted: completedLevelScore)
+    }
+
     @discardableResult
     func submitLeaderboardEntry(initials: String) -> LeaderboardEntry {
-        let entry = LeaderboardEntry(initials: initials, levelsCompleted: levelsCompleted)
-        leaderboardEntries = leaderboardStore.adding(entry, to: leaderboardEntries)
-        leaderboardStore.save(leaderboardEntries)
+        let normalizedInitials = LeaderboardEntry.normalizedInitials(initials).paddingToThreeCharacters()
+        let entry = LeaderboardEntry(initials: normalizedInitials, levelsCompleted: currentLeaderboardSubmissionScore)
+        leaderboardInitials = normalizedInitials
+        _ = saveLeaderboardEntry(entry)
+        save()
         return entry
+    }
+
+    private var currentLeaderboardSubmissionScore: Int {
+        game.isComplete ? completedLevelScore : levelsCompleted
+    }
+
+    @discardableResult
+    private func saveLeaderboardEntry(initials: String, levelsCompleted: Int) -> Bool {
+        let entry = LeaderboardEntry(initials: initials, levelsCompleted: levelsCompleted)
+        return saveLeaderboardEntry(entry)
+    }
+
+    @discardableResult
+    private func saveLeaderboardEntry(_ entry: LeaderboardEntry) -> Bool {
+        let updatedEntries = leaderboardStore.upserting(entry, in: leaderboardEntries)
+        guard updatedEntries != leaderboardEntries else { return false }
+
+        leaderboardEntries = updatedEntries
+        leaderboardUpdateCount += 1
+        leaderboardStore.save(leaderboardEntries)
+        save()
+        return true
     }
 
     func snapshot() -> SudokuSessionSnapshot {
@@ -165,7 +214,8 @@ final class SudokuSessionStore {
             selectedCellID: selectedCell,
             boardSize: boardSize,
             livesRemaining: livesRemaining,
-            level: level
+            level: level,
+            leaderboardInitials: leaderboardInitials
         )
     }
 
@@ -182,5 +232,13 @@ final class SudokuSessionStore {
 
     private func save() {
         persistence.save(snapshot())
+    }
+}
+
+private extension String {
+    func paddingToThreeCharacters() -> String {
+        let normalized = LeaderboardEntry.normalizedInitials(self)
+        guard !normalized.isEmpty else { return "AAA" }
+        return normalized.padding(toLength: 3, withPad: "A", startingAt: 0)
     }
 }

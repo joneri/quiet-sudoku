@@ -33,6 +33,12 @@ if [[ ! -f "$APP_BUNDLE/Contents/embedded.provisionprofile" ]]; then
   exit 1
 fi
 
+/usr/bin/xattr -cr "$APP_BUNDLE"
+if /usr/bin/xattr -pr com.apple.quarantine "$APP_BUNDLE" >/dev/null 2>&1; then
+  echo "Built app still contains com.apple.quarantine extended attributes." >&2
+  exit 1
+fi
+
 rm -f "$PKG_PATH"
 /usr/bin/productbuild \
   --component "$APP_BUNDLE" /Applications \

@@ -2,6 +2,7 @@ import AppKit
 import SwiftUI
 
 struct LeaderboardEntryView: View {
+    let title: String
     let levelsCompleted: Int
     let entries: [LeaderboardEntry]
     let onSubmit: (String) -> Void
@@ -10,9 +11,9 @@ struct LeaderboardEntryView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            Text("Game Over")
+            Text(title)
                 .font(.system(size: 34, weight: .black, design: .rounded))
-                .foregroundStyle(Color.red.opacity(0.95))
+                .foregroundStyle(title == "Game Over" ? Color.red.opacity(0.95) : Color.green.opacity(0.95))
 
             scoreText
 

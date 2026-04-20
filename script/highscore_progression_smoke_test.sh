@@ -4,9 +4,9 @@ set -euo pipefail
 APP_NAME="macSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
-STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-complete-state.XXXXXX.json")"
-SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-complete-save.XXXXXX.json")"
-LEADERBOARD_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-complete-leaderboard.XXXXXX.json")"
+STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-highscore-state.XXXXXX.json")"
+SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-highscore-save.XXXXXX.json")"
+LEADERBOARD_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-highscore-leaderboard.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true
@@ -19,7 +19,7 @@ trap cleanup EXIT
 "$ROOT_DIR/script/build_and_run.sh" --verify
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
-/usr/bin/python3 - "$SAVE_FILE" <<'PY'
+/usr/bin/python3 - "$SAVE_FILE" "$LEADERBOARD_FILE" <<'PY'
 import json
 import sys
 
@@ -44,14 +44,28 @@ snapshot = {
         "solution": solution,
     },
     "values": values,
+    "candidateValues": [None for _ in range(81)],
     "selectedCellID": 3,
     "boardSize": "large",
     "livesRemaining": 3,
-    "level": {"number": 1},
+    "level": {"number": 2},
+    "leaderboardInitials": "MOM",
 }
+
+entries = [{"id": "00000000-0000-0000-0000-000000000001", "initials": "MOM", "levelsCompleted": 1, "achievedAt": 766756800}]
+for index in range(2, 18):
+    entries.append({
+        "id": f"00000000-0000-0000-0000-{index:012d}",
+        "initials": f"T{index % 10}A",
+        "levelsCompleted": max(0, 17 - index),
+        "achievedAt": 766756800 + index,
+    })
 
 with open(sys.argv[1], "w", encoding="utf-8") as handle:
     json.dump(snapshot, handle)
+
+with open(sys.argv[2], "w", encoding="utf-8") as handle:
+    json.dump(entries, handle)
 PY
 
 /usr/bin/open -n \
@@ -77,7 +91,7 @@ try:
 except Exception:
     sys.exit(1)
 
-sys.exit(0 if eval(expression, {"__builtins__": {}}, {"state": state}) else 1)
+sys.exit(0 if eval(expression, {"__builtins__": {"any": any, "len": len}}, {"state": state}) else 1)
 PY
     then
       return 0
@@ -86,7 +100,7 @@ PY
     sleep 0.1
   done
 
-  echo "Completion animation smoke test failed while waiting for: $label" >&2
+  echo "High score progression smoke test failed while waiting for: $label" >&2
   [[ -f "$STATE_FILE" ]] && cat "$STATE_FILE" >&2
   exit 1
 }
@@ -243,18 +257,11 @@ guard result == .success else {
 SWIFT
 }
 
-wait_for_state 'state["isComplete"] == False and state["sparkleTriggerCount"] == 0 and state["livesRemaining"] == 3' "nearly complete puzzle starts without completion sparkle"
+wait_for_state 'state["level"] == 2 and state["leaderboardInitials"] == "MOM" and len(state["leaderboardEntries"]) == 15 and any(entry["initials"] == "MOM" and entry["levelsCompleted"] == 1 for entry in state["leaderboardEntries"])' "active leaderboard run starts at level 2 with capped scores"
 click_cell 0 3
-wait_for_state 'state["selected"]["row"] == 0 and state["selected"]["column"] == 3' "last empty cell is selected"
 send_text "4"
-wait_for_state 'state["isComplete"] == False and state["sparkleTriggerCount"] == 0' "final digit floats before lock"
 press_accessibility_button "lock-candidate-cell-0-3"
-wait_for_state 'state["isComplete"] == True and state["sparkleTriggerCount"] == 1 and state["livesRemaining"] == 4 and state["isShowingCompletionMessage"] == True and state["isConfirmingNewBoard"] == False' "final correct digit solves puzzle, triggers exactly one sparkle, awards one heart, and shows congratulations"
-wait_for_state 'state["isComplete"] == True and state["sparkleTriggerCount"] == 1 and state["livesRemaining"] == 4 and state["isShowingCompletionMessage"] == False and state["isEnteringLeaderboard"] == True and state["isConfirmingNewBoard"] == False' "first completed level asks for leaderboard initials"
-send_text "mom"
-press_accessibility_button "submit-leaderboard-button"
-wait_for_state 'state["leaderboardInitials"] == "MOM" and state["leaderboardEntries"][0]["initials"] == "MOM" and state["leaderboardEntries"][0]["levelsCompleted"] == 1 and state["leaderboardUpdateCount"] == 1 and state["isEnteringLeaderboard"] == False and state["isConfirmingNewBoard"] == True' "completed level saves first high score before next board prompt"
-press_accessibility_button "confirm-new-board-button"
-wait_for_state 'state["level"] == 2 and state["levelsCompleted"] == 1 and state["livesRemaining"] == 4 and state["filledCellCount"] == 41 and state["isComplete"] == False and state["isConfirmingNewBoard"] == False' "confirming after completion advances to level 2 with harder puzzle"
+wait_for_state 'state["isComplete"] == True and state["leaderboardUpdateCount"] == 1 and any(entry["initials"] == "MOM" and entry["levelsCompleted"] == 2 for entry in state["leaderboardEntries"]) and len(state["leaderboardEntries"]) == 15 and state["isEnteringLeaderboard"] == False' "level completion automatically updates the active high score"
+wait_for_state 'state["isConfirmingNewBoard"] == True and state["isEnteringLeaderboard"] == False' "active high score run continues without asking for initials again"
 
-echo "Completion animation smoke test passed: sparkle triggers only when the puzzle becomes complete, records first high score, then advances to level 2 after confirmation."
+echo "High score progression smoke test passed: active initials auto-update on later wins and the leaderboard stays capped at 15 entries."

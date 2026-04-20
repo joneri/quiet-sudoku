@@ -118,8 +118,15 @@ if [[ -n "$PROFILE_PATH" && -f "$PROFILE_PATH" && -n "$SIGNING_IDENTITY" ]]; the
     else
       fail "signed app is missing the provisioning profile application identifier"
     fi
+
   else
     fail "could not build a signed app with the provisioning profile"
+  fi
+fi
+
+if [[ -n "$PROFILE_PATH" && -f "$PROFILE_PATH" ]]; then
+  if xattr -p com.apple.quarantine "$PROFILE_PATH" >/dev/null 2>&1; then
+    warn "source provisioning profile has quarantine metadata; package step will strip extended attributes"
   fi
 fi
 

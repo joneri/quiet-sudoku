@@ -4,7 +4,7 @@ struct LeaderboardStore {
     private let fileURL: URL
     private let limit: Int
 
-    init(fileURL: URL = Self.defaultFileURL(), limit: Int = 10) {
+    init(fileURL: URL = Self.defaultFileURL(), limit: Int = 15) {
         self.fileURL = fileURL
         self.limit = limit
     }
@@ -27,6 +27,28 @@ struct LeaderboardStore {
 
     func adding(_ entry: LeaderboardEntry, to entries: [LeaderboardEntry]) -> [LeaderboardEntry] {
         sorted(entries + [entry])
+    }
+
+    func upserting(_ entry: LeaderboardEntry, in entries: [LeaderboardEntry]) -> [LeaderboardEntry] {
+        var bestEntries = entries.filter { $0.initials != entry.initials }
+        if let existing = entries.filter({ $0.initials == entry.initials }).max(by: { $0.levelsCompleted < $1.levelsCompleted }),
+           existing.levelsCompleted >= entry.levelsCompleted {
+            bestEntries.append(existing)
+        } else {
+            bestEntries.append(entry)
+        }
+
+        return sorted(bestEntries)
+    }
+
+    func qualifies(levelsCompleted: Int, against entries: [LeaderboardEntry]) -> Bool {
+        guard levelsCompleted > 0 else { return false }
+        let sortedEntries = sorted(entries)
+        guard sortedEntries.count >= limit, let lowest = sortedEntries.last else {
+            return true
+        }
+
+        return levelsCompleted > lowest.levelsCompleted
     }
 
     private func sorted(_ entries: [LeaderboardEntry]) -> [LeaderboardEntry] {
