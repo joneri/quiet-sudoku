@@ -1,22 +1,14 @@
-# Epic
+# Epic: Prepare Mac App Store export and upload path
 
-Add levels and a local leaderboard to macSudoku.
+Mode: Auto
+Cost profile: Cost Control
 
-The player starts at level 1 on an easy board. Each solved board advances the player to the next level, and later levels become progressively harder. The current level must be visible while playing. When the player reaches Game Over, they can enter three characters for a local leaderboard. Leaderboard score is based on how many levels were completed in that run. A timer may be added in the future, but it is intentionally out of scope for this epic.
+Prepare the macOS Sudoku app for the next Apple distribution step after local Apple Distribution signing has passed.
 
-## Acceptance Criteria
+The Epic focuses on:
+- Mac App Store provisioning profile readiness
+- App Store Connect app record verification
+- signed installer package export path
+- App Store Connect validation/upload command path
 
-- A new run starts at level 1.
-- Level 1 has an easier board than later levels.
-- Solving a board advances to the next level after the existing congratulations and new-board confirmation flow.
-- The current level is visible in the top shelf.
-- Game Over shows a three-character initials entry before starting over.
-- Submitted leaderboard entries store initials and completed-level count.
-- The leaderboard is persisted locally and sorted by completed levels descending.
-- Existing hearts, candidate locking, completion animation, New confirmation, board sizing, persistence, mouse selection, and keyboard input continue to work.
-
-## Non-goals
-
-- No timer.
-- No online leaderboard.
-- No player profiles.
+Human-owned Apple account actions must be reduced to exact blockers when Codex cannot complete them locally.

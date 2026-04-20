@@ -3,30 +3,15 @@
   "mode": "Auto",
   "cost_profile": "Cost Control",
   "epic": {
-    "title": "Levels and local leaderboard",
-    "status": "closed"
+    "title": "Prepare Mac App Store export and upload path",
+    "status": "final_review"
   },
   "current_role": "PO",
-  "current_gate": "closed",
+  "current_gate": "E",
   "increments": [
     {
-      "id": "LEVEL-001",
-      "title": "Playable levels with Game Over leaderboard entry",
-      "status": "accepted"
-    },
-    {
-      "id": "LEVEL-002",
-      "title": "Obvious high-score entry and top-shelf scores access",
-      "status": "accepted"
-    },
-    {
-      "id": "LEVEL-003",
-      "title": "Level difficulty ramp verification",
-      "status": "accepted"
-    },
-    {
-      "id": "LEVEL-004",
-      "title": "Medium top-shelf layout fit",
+      "id": "APPSTORE-001",
+      "title": "Provisioning, package export, and App Store Connect upload preflight",
       "status": "accepted"
     }
   ]

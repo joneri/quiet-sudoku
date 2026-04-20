@@ -163,6 +163,70 @@ guard result == .success else {
 SWIFT
 }
 
+click_cell() {
+  local row="$1"
+  local column="$2"
+  local pid
+  pid="$(pgrep -x "$APP_NAME" | head -n 1)"
+
+  /usr/bin/swift - "$pid" "$row" "$column" <<'SWIFT'
+import AppKit
+import Foundation
+
+let pid = pid_t(Int32(CommandLine.arguments[1])!)
+let row = CommandLine.arguments[2]
+let column = CommandLine.arguments[3]
+let targetIdentifier = "sudoku-cell-\(row)-\(column)"
+
+func children(of element: AXUIElement) -> [AXUIElement] {
+    var value: CFTypeRef?
+    guard AXUIElementCopyAttributeValue(element, kAXChildrenAttribute as CFString, &value) == .success else {
+        return []
+    }
+
+    return (value as? [AXUIElement]) ?? []
+}
+
+func stringAttribute(_ name: String, of element: AXUIElement) -> String? {
+    var value: CFTypeRef?
+    guard AXUIElementCopyAttributeValue(element, name as CFString, &value) == .success else {
+        return nil
+    }
+
+    return value as? String
+}
+
+func findElement(identifier: String, in element: AXUIElement) -> AXUIElement? {
+    if stringAttribute("AXIdentifier", of: element) == identifier {
+        return element
+    }
+
+    for child in children(of: element) {
+        if let match = findElement(identifier: identifier, in: child) {
+            return match
+        }
+    }
+
+    return nil
+}
+
+NSRunningApplication(processIdentifier: pid)?.activate()
+Thread.sleep(forTimeInterval: 0.2)
+
+let appElement = AXUIElementCreateApplication(pid)
+guard let cell = findElement(identifier: targetIdentifier, in: appElement) else {
+    fputs("Could not find \(targetIdentifier) through Accessibility\n", stderr)
+    exit(2)
+}
+
+let result = AXUIElementPerformAction(cell, kAXPressAction as CFString)
+guard result == .success else {
+    fputs("Could not press \(targetIdentifier). Result: \(result.rawValue)\n", stderr)
+    exit(2)
+}
+SWIFT
+}
+
 send_text() {
   local text="$1"
   /usr/bin/osascript <<OSA
@@ -187,6 +251,8 @@ advance_from_level_and_assert_next() {
     "$APP_BUNDLE"
 
   wait_for_state 'state["level"] == '"$current_level"' and state["isComplete"] == False' "level $current_level nearly complete state"
+  click_cell 0 3
+  wait_for_state 'state["selected"]["row"] == 0 and state["selected"]["column"] == 3' "level $current_level final cell selected"
   send_text "4"
   wait_for_state 'state["isComplete"] == False and state["cells"][3]["candidateValue"] == 4' "level $current_level final candidate"
   press_accessibility_button "lock-candidate-cell-0-3"
