@@ -28,6 +28,11 @@
       "id": "CONTRAST-004",
       "title": "Soften green digit outline into a white halo",
       "status": "accepted"
+    },
+    {
+      "id": "CONTRAST-005",
+      "title": "Move locked-digit status from green text to green cell background",
+      "status": "accepted"
     }
   ]
 }

@@ -32,7 +32,6 @@ struct SudokuCellView: View {
                     ZStack {
                         digitText
                             .foregroundStyle(foregroundStyle)
-                            .modifier(lockedDigitReadabilityStyle(for: side))
                     }
                     .minimumScaleFactor(0.32)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -62,6 +61,10 @@ struct SudokuCellView: View {
             return Color.green.opacity(0.22)
         }
 
+        if isPlayerLocked {
+            return Color.green.opacity(isDigitComplete ? 0.24 : 0.16)
+        }
+
         if isMatched {
             return Color.cyan.opacity(0.14)
         }
@@ -82,23 +85,15 @@ struct SudokuCellView: View {
             return Color(red: 0.86, green: 0.34, blue: 0.05)
         }
 
-        return cell.isGiven ? Color.primary : lockedDigitColor
-    }
-
-    private var lockedDigitColor: Color {
-        if isDigitComplete {
-            return Color(red: 0.00, green: 0.46, blue: 0.16)
-        }
-
-        return Color(red: 0.00, green: 0.42, blue: 0.14)
+        return Color.primary
     }
 
     private var candidateShadowColor: Color {
         Color.black.opacity(0.58)
     }
 
-    private var usesLockedDigitHalo: Bool {
-        !cell.isGiven && !cell.hasCandidate && !hasConflict
+    private var isPlayerLocked: Bool {
+        !cell.isGiven && cell.value != nil && !cell.hasCandidate && !hasConflict
     }
 
     private func fontSize(for side: CGFloat) -> CGFloat {
@@ -119,30 +114,6 @@ struct SudokuCellView: View {
         }
 
         return cell.isGiven ? .semibold : .bold
-    }
-
-    private func lockedDigitReadabilityStyle(for side: CGFloat) -> SudokuLockedDigitReadabilityStyle {
-        SudokuLockedDigitReadabilityStyle(
-            isEnabled: usesLockedDigitHalo,
-            edgeColor: Color.white.opacity(0.78),
-            edgeRadius: min(max(side * 0.012, 0.6), 1.0),
-            haloColor: Color.white.opacity(0.38),
-            haloRadius: min(max(side * 0.036, 1.5), 2.6)
-        )
-    }
-}
-
-private struct SudokuLockedDigitReadabilityStyle: ViewModifier {
-    let isEnabled: Bool
-    let edgeColor: Color
-    let edgeRadius: CGFloat
-    let haloColor: Color
-    let haloRadius: CGFloat
-
-    func body(content: Content) -> some View {
-        content
-            .shadow(color: isEnabled ? edgeColor : .clear, radius: edgeRadius)
-            .shadow(color: isEnabled ? haloColor : .clear, radius: haloRadius)
     }
 }
 
