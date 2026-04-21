@@ -1,11 +1,11 @@
-# Epic: Game Over visibility
+# Epic: Green digit contrast
 
 Mode: Strict
 Cost profile: Cost Control
 
-Ensure the Game Over message is visible before the new-board confirmation appears.
+Improve readability for green correct numbers when the glass board floats above a bright or white background.
 
 Desired behavior:
-- When the player loses all lives and no initials entry is needed, show Game Over on its own first.
-- After a short readable pause, show the new-board confirmation dialog.
-- Keep the existing high score initials Game Over flow working.
+- Green player-entered numbers remain visibly green and rewarding.
+- Correct/completed green numbers have enough visual weight and shadow to stay readable over light content beneath the glass.
+- The fix stays local to Sudoku cell rendering and does not change game rules.

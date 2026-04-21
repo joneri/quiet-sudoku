@@ -17,14 +17,26 @@ struct SudokuCellView: View {
                     .fill(backgroundStyle)
 
                 if let value = cell.displayValue {
-                    Text("\(value)")
+                    let digitText = Text("\(value)")
                         .font(.system(size: fontSize(for: side), weight: fontWeight, design: .rounded))
-                        .minimumScaleFactor(0.32)
-                        .foregroundStyle(foregroundStyle)
+
+                    let shadowStyle = SudokuDigitShadowStyle(
+                        candidateShadowColor: candidateShadowColor,
+                        candidateShadowRadius: cell.hasCandidate ? min(side * 0.24, 13) : 0,
+                        candidateShadowOffset: cell.hasCandidate ? min(side * 0.24, 13) : 0,
+                        candidateGroundShadowColor: Color.black.opacity(cell.hasCandidate ? 0.34 : 0),
+                        candidateGroundShadowRadius: cell.hasCandidate ? min(side * 0.10, 4) : 0,
+                        candidateGroundShadowOffset: cell.hasCandidate ? min(side * 0.14, 6) : 0
+                    )
+
+                    ZStack {
+                        digitText
+                            .foregroundStyle(foregroundStyle)
+                            .modifier(lockedDigitReadabilityStyle(for: side))
+                    }
+                    .minimumScaleFactor(0.32)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .shadow(color: digitGlowColor, radius: isDigitComplete ? min(side * 0.18, 11) : 0)
-                        .shadow(color: candidateShadowColor, radius: cell.hasCandidate ? min(side * 0.24, 13) : 0, y: cell.hasCandidate ? min(side * 0.24, 13) : 0)
-                        .shadow(color: Color.black.opacity(cell.hasCandidate ? 0.34 : 0), radius: cell.hasCandidate ? min(side * 0.10, 4) : 0, y: cell.hasCandidate ? min(side * 0.14, 6) : 0)
+                        .modifier(shadowStyle)
                         .offset(y: cell.hasCandidate ? -candidateLift(for: side) : 0)
                         .animation(.snappy(duration: 0.22), value: cell.hasCandidate)
                 }
@@ -70,15 +82,23 @@ struct SudokuCellView: View {
             return Color(red: 0.86, green: 0.34, blue: 0.05)
         }
 
-        return cell.isGiven ? Color.primary : Color.green.opacity(0.88)
+        return cell.isGiven ? Color.primary : lockedDigitColor
     }
 
-    private var digitGlowColor: Color {
-        hasConflict ? .clear : Color.green.opacity(0.75)
+    private var lockedDigitColor: Color {
+        if isDigitComplete {
+            return Color(red: 0.00, green: 0.46, blue: 0.16)
+        }
+
+        return Color(red: 0.00, green: 0.42, blue: 0.14)
     }
 
     private var candidateShadowColor: Color {
         Color.black.opacity(0.58)
+    }
+
+    private var usesLockedDigitHalo: Bool {
+        !cell.isGiven && !cell.hasCandidate && !hasConflict
     }
 
     private func fontSize(for side: CGFloat) -> CGFloat {
@@ -86,7 +106,7 @@ struct SudokuCellView: View {
             return min(max(side * 0.66, 21), 34)
         }
 
-        return min(max(side * 0.54, 18), 28)
+        return min(max(side * 0.56, 19), 29)
     }
 
     private func candidateLift(for side: CGFloat) -> CGFloat {
@@ -98,6 +118,45 @@ struct SudokuCellView: View {
             return .bold
         }
 
-        return cell.isGiven ? .semibold : .medium
+        return cell.isGiven ? .semibold : .bold
+    }
+
+    private func lockedDigitReadabilityStyle(for side: CGFloat) -> SudokuLockedDigitReadabilityStyle {
+        SudokuLockedDigitReadabilityStyle(
+            isEnabled: usesLockedDigitHalo,
+            edgeColor: Color.white.opacity(0.78),
+            edgeRadius: min(max(side * 0.012, 0.6), 1.0),
+            haloColor: Color.white.opacity(0.38),
+            haloRadius: min(max(side * 0.036, 1.5), 2.6)
+        )
+    }
+}
+
+private struct SudokuLockedDigitReadabilityStyle: ViewModifier {
+    let isEnabled: Bool
+    let edgeColor: Color
+    let edgeRadius: CGFloat
+    let haloColor: Color
+    let haloRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .shadow(color: isEnabled ? edgeColor : .clear, radius: edgeRadius)
+            .shadow(color: isEnabled ? haloColor : .clear, radius: haloRadius)
+    }
+}
+
+private struct SudokuDigitShadowStyle: ViewModifier {
+    let candidateShadowColor: Color
+    let candidateShadowRadius: CGFloat
+    let candidateShadowOffset: CGFloat
+    let candidateGroundShadowColor: Color
+    let candidateGroundShadowRadius: CGFloat
+    let candidateGroundShadowOffset: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .shadow(color: candidateShadowColor, radius: candidateShadowRadius, y: candidateShadowOffset)
+            .shadow(color: candidateGroundShadowColor, radius: candidateGroundShadowRadius, y: candidateGroundShadowOffset)
     }
 }

@@ -3,15 +3,30 @@
   "mode": "Strict",
   "cost_profile": "Cost Control",
   "epic": {
-    "title": "Game Over visibility",
+    "title": "Green digit contrast",
     "status": "final_review"
   },
   "current_role": "PO",
   "current_gate": "E",
   "increments": [
     {
-      "id": "GAMEOVER-001",
-      "title": "Delay new-board prompt until Game Over is visible",
+      "id": "CONTRAST-001",
+      "title": "Improve green digit readability on bright backgrounds",
+      "status": "accepted"
+    },
+    {
+      "id": "CONTRAST-002",
+      "title": "Replace blurry digit shadow with crisp green digit treatment",
+      "status": "accepted"
+    },
+    {
+      "id": "CONTRAST-003",
+      "title": "Add crisp white outline for green digits on dark backgrounds",
+      "status": "accepted"
+    },
+    {
+      "id": "CONTRAST-004",
+      "title": "Soften green digit outline into a white halo",
       "status": "accepted"
     }
   ]
