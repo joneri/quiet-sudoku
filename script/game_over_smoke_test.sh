@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="macSudoku"
+APP_NAME="QuietSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
-STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-game-over-state.XXXXXX.json")"
-SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-game-over-save.XXXXXX.json")"
-LEADERBOARD_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-leaderboard.XXXXXX.json")"
+STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-game-over-state.XXXXXX.json")"
+SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-game-over-save.XXXXXX.json")"
+LEADERBOARD_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-leaderboard.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true

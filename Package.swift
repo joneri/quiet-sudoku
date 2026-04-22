@@ -3,18 +3,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "macSudoku",
+    name: "QuietSudoku",
     platforms: [
         .macOS(.v15)
     ],
     products: [
-        .executable(name: "macSudoku", targets: ["macSudoku"])
+        .executable(name: "QuietSudoku", targets: ["QuietSudoku"])
     ],
     targets: [
         .executableTarget(
-            name: "macSudoku",
-            path: "Sources/macSudoku"
+            name: "QuietSudoku",
+            path: "Sources/QuietSudoku"
         )
     ]
 )
-

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="macSudoku"
+APP_NAME="QuietSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
-STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-complete-state.XXXXXX.json")"
-SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-complete-save.XXXXXX.json")"
-LEADERBOARD_FILE="$(mktemp "${TMPDIR:-/tmp}/macSudoku-complete-leaderboard.XXXXXX.json")"
+STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-complete-state.XXXXXX.json")"
+SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-complete-save.XXXXXX.json")"
+LEADERBOARD_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-complete-leaderboard.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true
@@ -222,7 +222,7 @@ func findElement(identifier: String, in element: AXUIElement) -> AXUIElement? {
 }
 
 guard let app = NSRunningApplication(processIdentifier: pid) else {
-    fputs("Could not find running macSudoku app\n", stderr)
+    fputs("Could not find running Quiet Sudoku app\n", stderr)
     exit(1)
 }
 

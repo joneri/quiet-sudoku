@@ -125,7 +125,7 @@ enum UITestProbe {
             let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys])
             try data.write(to: URL(fileURLWithPath: statePath), options: [.atomic])
         } catch {
-            fputs("macSudoku UI test probe failed: \(error)\n", stderr)
+            fputs("Quiet Sudoku UI test probe failed: \(error)\n", stderr)
         }
     }
 

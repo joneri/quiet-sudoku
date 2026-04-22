@@ -18,7 +18,7 @@ struct SudokuGamePersistence {
             let data = try JSONEncoder().encode(snapshot)
             try data.write(to: fileURL, options: [.atomic])
         } catch {
-            fputs("macSudoku failed to save game: \(error)\n", stderr)
+            fputs("Quiet Sudoku failed to save game: \(error)\n", stderr)
         }
     }
 
@@ -30,7 +30,7 @@ struct SudokuGamePersistence {
         let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         return baseURL
-            .appendingPathComponent("macSudoku", isDirectory: true)
+            .appendingPathComponent("QuietSudoku", isDirectory: true)
             .appendingPathComponent("game.json", isDirectory: false)
     }
 }

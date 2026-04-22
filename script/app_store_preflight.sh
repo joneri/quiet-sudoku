@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="macSudoku"
+APP_NAME="QuietSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUNDLE_ID="${MACSUDOKU_BUNDLE_ID:-se.jonaseriksson.macSudoku}"
 PROFILE_PATH="${MACSUDOKU_PROVISIONING_PROFILE_PATH:-}"

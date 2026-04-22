@@ -119,13 +119,13 @@ Role impact rule:
 - `Dev`: implementation and verification behavior within approved Gate B
 - `Reviewer`: correctness/risk checks and final readiness signal
 
-## macSudoku repository profile
+## Quiet Sudoku repository profile
 
-This repository is a SwiftPM-based macOS Sudoku app using SwiftUI, focused AppKit interop, and lightweight shell-first build and smoke-test workflows.
+This repository is a SwiftPM-based desktop Sudoku app using SwiftUI, focused AppKit interop, and lightweight shell-first build and smoke-test workflows.
 
 Runtime and stack assumptions:
-- Target platform is modern macOS.
-- UI work should feel native to current macOS, including appropriate glass/material effects.
+- Target platform is modern Apple desktop systems.
+- UI work should feel native to current desktop, including appropriate glass/material effects.
 - The app is intentionally minimal: a floating, non-disruptive Sudoku window with the board as the main experience.
 - Keep AppKit interop isolated behind small wrappers.
 - Keep AIM runtime state in `.aim/`; it must not become product behavior or app test data.
@@ -140,12 +140,12 @@ Architecture quality rule:
 - Every new increment must leave the code more reusable, readable, and componentized than it found it.
 - Prefer small, named SwiftUI views over large computed `some View` fragments.
 - Keep view state ownership explicit and close to the scene or feature root.
-- Put reusable value types in `Sources/macSudoku/Models/`, focused view components in `Sources/macSudoku/Views/`, and narrow platform bridges in `Sources/macSudoku/Support/`.
+- Put reusable value types in `Sources/QuietSudoku/Models/`, focused view components in `Sources/QuietSudoku/Views/`, and narrow platform bridges in `Sources/QuietSudoku/Support/`.
 - Pass explicit data and closures into child views instead of giving them broad ownership of parent state.
 - Add abstractions only when they remove real complexity, reduce meaningful duplication, or match an established local pattern.
 - Treat readability and future reuse as acceptance criteria, not cleanup for later.
 
-macSudoku AIM role constraints:
+Quiet Sudoku AIM role constraints:
 - `PO` owns Epic intent, acceptance intent, user-value boundaries, and the minimal non-disruptive product feel.
 - `TDO` owns increment scope, architecture fit, verification strategy, and whether a change preserves the intentionally simple app surface.
 - `Dev` owns focused implementation within the approved increment and must use existing project patterns before introducing new structure.

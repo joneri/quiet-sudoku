@@ -2,7 +2,8 @@
 set -euo pipefail
 
 MODE="${1:-run}"
-APP_NAME="macSudoku"
+APP_NAME="QuietSudoku"
+DISPLAY_NAME="Quiet Sudoku"
 BUNDLE_ID="${MACSUDOKU_BUNDLE_ID:-se.jonaseriksson.macSudoku}"
 MARKETING_VERSION="${MACSUDOKU_MARKETING_VERSION:-1.0}"
 BUILD_NUMBER="${MACSUDOKU_BUILD_NUMBER:-1}"
@@ -20,10 +21,10 @@ APP_MACOS="$APP_CONTENTS/MacOS"
 APP_RESOURCES="$APP_CONTENTS/Resources"
 APP_BINARY="$APP_MACOS/$APP_NAME"
 INFO_PLIST="$APP_CONTENTS/Info.plist"
-DEFAULT_ENTITLEMENTS="$ROOT_DIR/Config/macSudoku.entitlements"
+DEFAULT_ENTITLEMENTS="$ROOT_DIR/Config/QuietSudoku.entitlements"
 GENERATED_ENTITLEMENTS="$DIST_DIR/$APP_NAME.generated.entitlements"
-APP_ICON_SOURCE="$ROOT_DIR/Config/macSudoku.icns"
-APP_ICON_NAME="macSudoku.icns"
+APP_ICON_SOURCE="$ROOT_DIR/Config/QuietSudoku.icns"
+APP_ICON_NAME="QuietSudoku.icns"
 
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
@@ -58,9 +59,9 @@ cat >"$INFO_PLIST" <<PLIST
   <key>CFBundleIdentifier</key>
   <string>$BUNDLE_ID</string>
   <key>CFBundleDisplayName</key>
-  <string>macSudoku</string>
+  <string>$DISPLAY_NAME</string>
   <key>CFBundleName</key>
-  <string>$APP_NAME</string>
+  <string>$DISPLAY_NAME</string>
   <key>CFBundleIconFile</key>
   <string>$APP_ICON_NAME</string>
   <key>CFBundlePackageType</key>

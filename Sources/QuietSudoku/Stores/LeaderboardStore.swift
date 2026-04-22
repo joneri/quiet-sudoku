@@ -21,7 +21,7 @@ struct LeaderboardStore {
             let data = try JSONEncoder().encode(sorted(entries))
             try data.write(to: fileURL, options: [.atomic])
         } catch {
-            fputs("macSudoku failed to save leaderboard: \(error)\n", stderr)
+            fputs("Quiet Sudoku failed to save leaderboard: \(error)\n", stderr)
         }
     }
 
@@ -72,7 +72,7 @@ struct LeaderboardStore {
         let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         return baseURL
-            .appendingPathComponent("macSudoku", isDirectory: true)
+            .appendingPathComponent("QuietSudoku", isDirectory: true)
             .appendingPathComponent("leaderboard.json", isDirectory: false)
     }
 }

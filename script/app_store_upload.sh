@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PKG_PATH="${MACSUDOKU_APP_STORE_PKG_PATH:-$ROOT_DIR/dist/macSudoku-app-store.pkg}"
+PKG_PATH="${MACSUDOKU_APP_STORE_PKG_PATH:-$ROOT_DIR/dist/QuietSudoku-app-store.pkg}"
 ACTION="${MACSUDOKU_UPLOAD_ACTION:-validate}"
 ASC_USERNAME="${MACSUDOKU_ASC_USERNAME:-}"
 ASC_PASSWORD="${MACSUDOKU_ASC_PASSWORD:-}"
