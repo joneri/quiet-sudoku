@@ -6,13 +6,11 @@ struct QuietSudokuApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        WindowGroup("Sudoku") {
+        WindowGroup("Quiet Sudoku") {
             SudokuBoardView()
                 .background(FloatingWindowConfigurator())
-                .toolbarVisibility(.hidden, for: .windowToolbar)
                 .containerBackground(.thinMaterial, for: .window)
         }
-        .windowStyle(.plain)
         .windowResizability(.contentSize)
         .defaultWindowPlacement { content, context in
             let ideal = content.sizeThatFits(.unspecified)
