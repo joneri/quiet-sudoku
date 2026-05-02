@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="QuietSudoku"
+APP_NAME="StillgridSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
 INFO_PLIST="$APP_BUNDLE/Contents/Info.plist"
-ENTITLEMENTS_PATH="${MACSUDOKU_ENTITLEMENTS_PATH:-$ROOT_DIR/Config/QuietSudoku.entitlements}"
-EXPECTED_BUNDLE_ID="${MACSUDOKU_BUNDLE_ID:-se.jonaseriksson.macSudoku}"
+ENTITLEMENTS_PATH="${STILLGRID_SUDOKU_ENTITLEMENTS_PATH:-$ROOT_DIR/Config/StillgridSudoku.entitlements}"
+EXPECTED_BUNDLE_ID="${STILLGRID_SUDOKU_BUNDLE_ID:-se.jonaseriksson.macSudoku}"
 
 failures=0
 
@@ -23,7 +23,7 @@ warn() {
   printf "WARN: %s\n" "$1"
 }
 
-MACSUDOKU_AD_HOC_SIGN="${MACSUDOKU_AD_HOC_SIGN:-1}" "$ROOT_DIR/script/build_and_run.sh" --verify >/dev/null
+STILLGRID_SUDOKU_AD_HOC_SIGN="${STILLGRID_SUDOKU_AD_HOC_SIGN:-1}" "$ROOT_DIR/script/build_and_run.sh" --verify >/dev/null
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
 [[ -d "$APP_BUNDLE" ]] && pass "app bundle exists" || fail "app bundle missing"
@@ -60,7 +60,7 @@ fi
 
 signature_output="$(codesign -dvvv --entitlements :- "$APP_BUNDLE" 2>&1 || true)"
 if grep -q "Signature=adhoc" <<<"$signature_output"; then
-  warn "app is ad-hoc signed for local validation; set MACSUDOKU_SIGNING_IDENTITY for Apple Distribution signing"
+  warn "app is ad-hoc signed for local validation; set STILLGRID_SUDOKU_SIGNING_IDENTITY for Apple Distribution signing"
 elif grep -q "Authority=Apple Distribution" <<<"$signature_output"; then
   pass "app is signed with Apple Distribution authority"
 else

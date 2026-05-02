@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 enum UITestProbe {
-    private static let statePathKey = "MACSUDOKU_UI_STATE_PATH"
+    private static let statePathKey = "STILLGRID_SUDOKU_UI_STATE_PATH"
 
     static var isEnabled: Bool {
         statePath != nil
@@ -125,7 +125,7 @@ enum UITestProbe {
             let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys])
             try data.write(to: URL(fileURLWithPath: statePath), options: [.atomic])
         } catch {
-            fputs("Quiet Sudoku UI test probe failed: \(error)\n", stderr)
+            fputs("Stillgrid Sudoku UI test probe failed: \(error)\n", stderr)
         }
     }
 

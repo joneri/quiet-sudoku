@@ -2,9 +2,9 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SOURCE_ICON="${1:-$ROOT_DIR/Config/QuietSudoku_app_icon_source.png}"
-ICONSET="$ROOT_DIR/Config/QuietSudoku.iconset"
-ICON_FILE="$ROOT_DIR/Config/QuietSudoku.icns"
+SOURCE_ICON="${1:-$ROOT_DIR/Config/StillgridSudoku_app_icon_source.png}"
+ICONSET="$ROOT_DIR/Config/StillgridSudoku.iconset"
+ICON_FILE="$ROOT_DIR/Config/StillgridSudoku.icns"
 
 if [[ ! -f "$SOURCE_ICON" ]]; then
   echo "Source icon not found: $SOURCE_ICON" >&2

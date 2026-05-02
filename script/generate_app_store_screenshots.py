@@ -3,7 +3,7 @@
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-ROOT = Path("/Users/jonaseriksson/dev-stuff/GitHub/macSudoku")
+ROOT = Path(__file__).resolve().parents[1]
 WINDOW_CAPTURE = ROOT / "screenshots" / "raw" / "window-clean.png"
 OUTPUT_DIR = ROOT / "screenshots" / "app-store"
 
@@ -18,7 +18,7 @@ SCREEN_SPECS = [
         "filename": "01-main-board.png",
         "bg_top": (24, 56, 49),
         "bg_bottom": (122, 156, 138),
-        "headline": "Quiet Sudoku",
+        "headline": "Stillgrid Sudoku",
         "body": "A calm focused Sudoku board\nfor short puzzle sessions.",
         "footer": "Minimal. Readable. Always about the board.",
         "window_scale": 0.77,
@@ -40,7 +40,7 @@ SCREEN_SPECS = [
         "bg_bottom": (108, 150, 121),
         "headline": "Gentle progress",
         "body": "Completed digits and board progress\nstay visible without visual clutter.",
-        "footer": "Quiet focus from first move to last.",
+        "footer": "Still focus from first move to last.",
         "window_scale": 0.73,
         "window_pos": (1660, 270),
     },

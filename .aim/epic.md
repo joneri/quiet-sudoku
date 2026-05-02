@@ -1,11 +1,27 @@
-# Epic: Green digit contrast
+# Epic: Rename to Stillgrid Sudoku
 
-Mode: Strict
-Cost profile: Cost Control
+Mode: Auto
+Cost profile: Standard
+Started: 2026-05-02
 
-Improve readability for green correct numbers when the glass board floats above a bright or white background.
+## Goal
 
-Desired behavior:
-- Green player-entered numbers remain visibly green and rewarding.
-- Correct/completed green numbers have enough visual weight and shadow to stay readable over light content beneath the glass.
-- The fix stays local to Sudoku cell rendering and does not change game rules.
+Rename the app and repository-facing project identity from the prior Quiet/Quite Sudoku naming to Stillgrid Sudoku so the product can use one distinctive name across macOS, future iOS work, App Store metadata, and GitHub.
+
+## Motivation
+
+The intended name, Quiet Sudoku, collides with an existing App Store app. The current App Store listing also contains the typo Quite Sudoku. Stillgrid Sudoku gives the project a unique and calm product identity before the next App Store update.
+
+## Non-goals
+
+- Do not change Sudoku gameplay, UI behavior, persistence format, or board interaction.
+- Do not change the App Store bundle identifier unless Apple distribution work explicitly requires a separate migration; the existing app update line must remain usable.
+- Do not rewrite historical AIM archive artifacts that describe earlier completed work.
+
+## Acceptance Criteria
+
+- SwiftPM package, executable target, source directory, app entry point, app bundle display name, scripts, distribution examples, privacy text, screenshot-generation copy, and active repo docs use Stillgrid Sudoku naming.
+- Existing local build and smoke-test scripts point at the renamed executable/app bundle.
+- App Store distribution scripts still preserve the existing bundle identifier by default while exposing Stillgrid Sudoku environment variable names.
+- GitHub repository identity is updated from `quiet-sudoku` to `stillgrid-sudoku`, and the local `origin` remote follows it.
+- Verification confirms the renamed app builds and launches.

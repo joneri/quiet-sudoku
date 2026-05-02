@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="QuietSudoku"
+APP_NAME="StillgridSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
-STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-lock-state.XXXXXX.json")"
-SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-lock-save.XXXXXX.json")"
+STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/StillgridSudoku-lock-state.XXXXXX.json")"
+SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/StillgridSudoku-lock-save.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true
@@ -50,8 +50,8 @@ with open(sys.argv[1], "w", encoding="utf-8") as handle:
 PY
 
 /usr/bin/open -n \
-  --env "MACSUDOKU_UI_STATE_PATH=$STATE_FILE" \
-  --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
+  --env "STILLGRID_SUDOKU_UI_STATE_PATH=$STATE_FILE" \
+  --env "STILLGRID_SUDOKU_SAVE_PATH=$SAVE_FILE" \
   "$APP_BUNDLE"
 
 wait_for_state() {

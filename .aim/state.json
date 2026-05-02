@@ -1,37 +1,17 @@
 {
   "aim_version": "1.6",
-  "mode": "Strict",
-  "cost_profile": "Cost Control",
+  "mode": "Auto",
+  "cost_profile": "Standard",
   "epic": {
-    "title": "Green digit contrast",
-    "status": "final_review"
+    "title": "Rename to Stillgrid Sudoku",
+    "status": "epic_complete"
   },
   "current_role": "PO",
   "current_gate": "E",
   "increments": [
     {
-      "id": "CONTRAST-001",
-      "title": "Improve green digit readability on bright backgrounds",
-      "status": "accepted"
-    },
-    {
-      "id": "CONTRAST-002",
-      "title": "Replace blurry digit shadow with crisp green digit treatment",
-      "status": "accepted"
-    },
-    {
-      "id": "CONTRAST-003",
-      "title": "Add crisp white outline for green digits on dark backgrounds",
-      "status": "accepted"
-    },
-    {
-      "id": "CONTRAST-004",
-      "title": "Soften green digit outline into a white halo",
-      "status": "accepted"
-    },
-    {
-      "id": "CONTRAST-005",
-      "title": "Move locked-digit status from green text to green cell background",
+      "id": "NAME-001",
+      "title": "Rename app, repository-facing code, and GitHub identity to Stillgrid Sudoku",
       "status": "accepted"
     }
   ]

@@ -1,10 +1,10 @@
 # Privacy Policy
 
-Quiet Sudoku does not collect, transmit, sell, or share personal data.
+Stillgrid Sudoku does not collect, transmit, sell, or share personal data.
 
 ## Data Collection
 
-Quiet Sudoku does not use analytics, tracking, advertising identifiers, third-party SDKs, accounts, sign-in, or cloud services.
+Stillgrid Sudoku does not use analytics, tracking, advertising identifiers, third-party SDKs, accounts, sign-in, or cloud services.
 
 ## Local Data
 
@@ -14,10 +14,10 @@ This data stays on your device and is not sent to the developer or any third par
 
 ## Network Access
 
-Quiet Sudoku does not require network access for gameplay.
+Stillgrid Sudoku does not require network access for gameplay.
 
 ## Contact
 
 For privacy questions, contact Jonas Eriksson through the project repository:
 
-https://github.com/joneri/quiet-sudoku
+https://github.com/joneri/stillgrid-sudoku

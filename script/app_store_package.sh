@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="QuietSudoku"
+APP_NAME="StillgridSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
 APP_BUNDLE="$DIST_DIR/$APP_NAME.app"
-PKG_PATH="${MACSUDOKU_APP_STORE_PKG_PATH:-$DIST_DIR/QuietSudoku-app-store.pkg}"
-SIGNING_IDENTITY="${MACSUDOKU_SIGNING_IDENTITY:-}"
-INSTALLER_SIGNING_IDENTITY="${MACSUDOKU_INSTALLER_SIGNING_IDENTITY:-}"
-PROFILE_PATH="${MACSUDOKU_PROVISIONING_PROFILE_PATH:-}"
+PKG_PATH="${STILLGRID_SUDOKU_APP_STORE_PKG_PATH:-$DIST_DIR/StillgridSudoku-app-store.pkg}"
+SIGNING_IDENTITY="${STILLGRID_SUDOKU_SIGNING_IDENTITY:-}"
+INSTALLER_SIGNING_IDENTITY="${STILLGRID_SUDOKU_INSTALLER_SIGNING_IDENTITY:-}"
+PROFILE_PATH="${STILLGRID_SUDOKU_PROVISIONING_PROFILE_PATH:-}"
 
 if [[ -z "$SIGNING_IDENTITY" ]]; then
-  echo "MACSUDOKU_SIGNING_IDENTITY must be set to an Apple Distribution or Mac App Distribution identity." >&2
+  echo "STILLGRID_SUDOKU_SIGNING_IDENTITY must be set to an Apple Distribution or Mac App Distribution identity." >&2
   exit 1
 fi
 
 if [[ -z "$INSTALLER_SIGNING_IDENTITY" ]]; then
-  echo "MACSUDOKU_INSTALLER_SIGNING_IDENTITY must be set to a Mac Installer Distribution identity." >&2
+  echo "STILLGRID_SUDOKU_INSTALLER_SIGNING_IDENTITY must be set to a Mac Installer Distribution identity." >&2
   exit 1
 fi
 
 if [[ -z "$PROFILE_PATH" || ! -f "$PROFILE_PATH" ]]; then
-  echo "MACSUDOKU_PROVISIONING_PROFILE_PATH must point to a Mac App Store Connect provisioning profile." >&2
+  echo "STILLGRID_SUDOKU_PROVISIONING_PROFILE_PATH must point to a Mac App Store Connect provisioning profile." >&2
   exit 1
 fi
 

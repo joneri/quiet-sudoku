@@ -119,7 +119,7 @@ Role impact rule:
 - `Dev`: implementation and verification behavior within approved Gate B
 - `Reviewer`: correctness/risk checks and final readiness signal
 
-## Quiet Sudoku repository profile
+## Stillgrid Sudoku repository profile
 
 This repository is a SwiftPM-based desktop Sudoku app using SwiftUI, focused AppKit interop, and lightweight shell-first build and smoke-test workflows.
 
@@ -140,12 +140,12 @@ Architecture quality rule:
 - Every new increment must leave the code more reusable, readable, and componentized than it found it.
 - Prefer small, named SwiftUI views over large computed `some View` fragments.
 - Keep view state ownership explicit and close to the scene or feature root.
-- Put reusable value types in `Sources/QuietSudoku/Models/`, focused view components in `Sources/QuietSudoku/Views/`, and narrow platform bridges in `Sources/QuietSudoku/Support/`.
+- Put reusable value types in `Sources/StillgridSudoku/Models/`, focused view components in `Sources/StillgridSudoku/Views/`, and narrow platform bridges in `Sources/StillgridSudoku/Support/`.
 - Pass explicit data and closures into child views instead of giving them broad ownership of parent state.
 - Add abstractions only when they remove real complexity, reduce meaningful duplication, or match an established local pattern.
 - Treat readability and future reuse as acceptance criteria, not cleanup for later.
 
-Quiet Sudoku AIM role constraints:
+Stillgrid Sudoku AIM role constraints:
 - `PO` owns Epic intent, acceptance intent, user-value boundaries, and the minimal non-disruptive product feel.
 - `TDO` owns increment scope, architecture fit, verification strategy, and whether a change preserves the intentionally simple app surface.
 - `Dev` owns focused implementation within the approved increment and must use existing project patterns before introducing new structure.

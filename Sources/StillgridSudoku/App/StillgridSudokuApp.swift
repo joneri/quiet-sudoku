@@ -2,11 +2,11 @@ import AppKit
 import SwiftUI
 
 @main
-struct QuietSudokuApp: App {
+struct StillgridSudokuApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {
-        WindowGroup("Quiet Sudoku") {
+        WindowGroup("Stillgrid Sudoku") {
             SudokuBoardView()
                 .background(FloatingWindowConfigurator())
                 .containerBackground(.thinMaterial, for: .window)

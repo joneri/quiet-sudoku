@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="QuietSudoku"
+APP_NAME="StillgridSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
-STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-level-state.XXXXXX.json")"
-SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-level-save.XXXXXX.json")"
+STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/StillgridSudoku-level-state.XXXXXX.json")"
+SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/StillgridSudoku-level-save.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true
@@ -246,8 +246,8 @@ advance_from_level_and_assert_next() {
   write_nearly_complete_save "$current_level"
 
   /usr/bin/open -n \
-    --env "MACSUDOKU_UI_STATE_PATH=$STATE_FILE" \
-    --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
+    --env "STILLGRID_SUDOKU_UI_STATE_PATH=$STATE_FILE" \
+    --env "STILLGRID_SUDOKU_SAVE_PATH=$SAVE_FILE" \
     "$APP_BUNDLE"
 
   wait_for_state 'state["level"] == '"$current_level"' and state["isComplete"] == False' "level $current_level nearly complete state"
@@ -265,8 +265,8 @@ pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 rm -f "$SAVE_FILE"
 
 /usr/bin/open -n \
-  --env "MACSUDOKU_UI_STATE_PATH=$STATE_FILE" \
-  --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
+  --env "STILLGRID_SUDOKU_UI_STATE_PATH=$STATE_FILE" \
+  --env "STILLGRID_SUDOKU_SAVE_PATH=$SAVE_FILE" \
   "$APP_BUNDLE"
 
 wait_for_state 'state["level"] == 1 and state["filledCellCount"] == 44' "fresh level 1 is easiest with 44 givens"

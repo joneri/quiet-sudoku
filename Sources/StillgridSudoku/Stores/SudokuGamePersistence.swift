@@ -18,19 +18,19 @@ struct SudokuGamePersistence {
             let data = try JSONEncoder().encode(snapshot)
             try data.write(to: fileURL, options: [.atomic])
         } catch {
-            fputs("Quiet Sudoku failed to save game: \(error)\n", stderr)
+            fputs("Stillgrid Sudoku failed to save game: \(error)\n", stderr)
         }
     }
 
     static func defaultFileURL() -> URL {
-        if let override = ProcessInfo.processInfo.environment["MACSUDOKU_SAVE_PATH"], !override.isEmpty {
+        if let override = ProcessInfo.processInfo.environment["STILLGRID_SUDOKU_SAVE_PATH"], !override.isEmpty {
             return URL(fileURLWithPath: override)
         }
 
         let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         return baseURL
-            .appendingPathComponent("QuietSudoku", isDirectory: true)
+            .appendingPathComponent("StillgridSudoku", isDirectory: true)
             .appendingPathComponent("game.json", isDirectory: false)
     }
 }

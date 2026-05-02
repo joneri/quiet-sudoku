@@ -21,7 +21,7 @@ struct LeaderboardStore {
             let data = try JSONEncoder().encode(sorted(entries))
             try data.write(to: fileURL, options: [.atomic])
         } catch {
-            fputs("Quiet Sudoku failed to save leaderboard: \(error)\n", stderr)
+            fputs("Stillgrid Sudoku failed to save leaderboard: \(error)\n", stderr)
         }
     }
 
@@ -65,14 +65,14 @@ struct LeaderboardStore {
     }
 
     static func defaultFileURL() -> URL {
-        if let override = ProcessInfo.processInfo.environment["MACSUDOKU_LEADERBOARD_PATH"], !override.isEmpty {
+        if let override = ProcessInfo.processInfo.environment["STILLGRID_SUDOKU_LEADERBOARD_PATH"], !override.isEmpty {
             return URL(fileURLWithPath: override)
         }
 
         let baseURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.temporaryDirectory
         return baseURL
-            .appendingPathComponent("QuietSudoku", isDirectory: true)
+            .appendingPathComponent("StillgridSudoku", isDirectory: true)
             .appendingPathComponent("leaderboard.json", isDirectory: false)
     }
 }

@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="QuietSudoku"
+APP_NAME="StillgridSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BUNDLE_ID="${MACSUDOKU_BUNDLE_ID:-se.jonaseriksson.macSudoku}"
-PROFILE_PATH="${MACSUDOKU_PROVISIONING_PROFILE_PATH:-}"
-SIGNING_IDENTITY="${MACSUDOKU_SIGNING_IDENTITY:-}"
-INSTALLER_SIGNING_IDENTITY="${MACSUDOKU_INSTALLER_SIGNING_IDENTITY:-}"
-ASC_USERNAME="${MACSUDOKU_ASC_USERNAME:-}"
-ASC_PASSWORD="${MACSUDOKU_ASC_PASSWORD:-}"
-ASC_API_KEY="${MACSUDOKU_ASC_API_KEY:-}"
-ASC_API_ISSUER="${MACSUDOKU_ASC_API_ISSUER:-}"
-ASC_P8_FILE_PATH="${MACSUDOKU_ASC_P8_FILE_PATH:-}"
-ASC_PROVIDER_PUBLIC_ID="${MACSUDOKU_ASC_PROVIDER_PUBLIC_ID:-}"
+BUNDLE_ID="${STILLGRID_SUDOKU_BUNDLE_ID:-se.jonaseriksson.macSudoku}"
+PROFILE_PATH="${STILLGRID_SUDOKU_PROVISIONING_PROFILE_PATH:-}"
+SIGNING_IDENTITY="${STILLGRID_SUDOKU_SIGNING_IDENTITY:-}"
+INSTALLER_SIGNING_IDENTITY="${STILLGRID_SUDOKU_INSTALLER_SIGNING_IDENTITY:-}"
+ASC_USERNAME="${STILLGRID_SUDOKU_ASC_USERNAME:-}"
+ASC_PASSWORD="${STILLGRID_SUDOKU_ASC_PASSWORD:-}"
+ASC_API_KEY="${STILLGRID_SUDOKU_ASC_API_KEY:-}"
+ASC_API_ISSUER="${STILLGRID_SUDOKU_ASC_API_ISSUER:-}"
+ASC_P8_FILE_PATH="${STILLGRID_SUDOKU_ASC_P8_FILE_PATH:-}"
+ASC_PROVIDER_PUBLIC_ID="${STILLGRID_SUDOKU_ASC_PROVIDER_PUBLIC_ID:-}"
 
 failures=0
 warnings=0
@@ -65,7 +65,7 @@ else
 fi
 
 if [[ -z "$PROFILE_PATH" ]]; then
-  fail "MACSUDOKU_PROVISIONING_PROFILE_PATH is unset"
+  fail "STILLGRID_SUDOKU_PROVISIONING_PROFILE_PATH is unset"
 elif [[ ! -f "$PROFILE_PATH" ]]; then
   fail "provisioning profile not found: $PROFILE_PATH"
 else
@@ -104,8 +104,8 @@ else
 fi
 
 if [[ -n "$PROFILE_PATH" && -f "$PROFILE_PATH" && -n "$SIGNING_IDENTITY" ]]; then
-  if MACSUDOKU_SIGNING_IDENTITY="$SIGNING_IDENTITY" \
-    MACSUDOKU_PROVISIONING_PROFILE_PATH="$PROFILE_PATH" \
+  if STILLGRID_SUDOKU_SIGNING_IDENTITY="$SIGNING_IDENTITY" \
+    STILLGRID_SUDOKU_PROVISIONING_PROFILE_PATH="$PROFILE_PATH" \
     "$ROOT_DIR/script/build_and_run.sh" --build >/dev/null; then
     signed_entitlements="$(codesign -d --entitlements :- "$ROOT_DIR/dist/$APP_NAME.app" 2>/dev/null || true)"
     profile_plist="$(mktemp)"
@@ -134,8 +134,8 @@ if ((${#auth_args[@]})); then
   list_args=(--list-apps --filter-bundle-id "$BUNDLE_ID" --filter-platform macos --output-format json)
   [[ -n "$ASC_PROVIDER_PUBLIC_ID" ]] && list_args+=(--provider-public-id "$ASC_PROVIDER_PUBLIC_ID")
 
-  if xcrun altool "${list_args[@]}" "${auth_args[@]}" >/tmp/macsudoku_appstore_apps.json; then
-    if grep -q "$BUNDLE_ID" /tmp/macsudoku_appstore_apps.json; then
+  if xcrun altool "${list_args[@]}" "${auth_args[@]}" >/tmp/stillgrid_sudoku_appstore_apps.json; then
+    if grep -q "$BUNDLE_ID" /tmp/stillgrid_sudoku_appstore_apps.json; then
       pass "App Store Connect app record exists for $BUNDLE_ID"
     else
       fail "App Store Connect is reachable, but no macOS app record was found for $BUNDLE_ID"

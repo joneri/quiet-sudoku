@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_NAME="QuietSudoku"
-BUNDLE_ID="dev.jonaseriksson.QuietSudoku"
+APP_NAME="StillgridSudoku"
+BUNDLE_ID="dev.jonaseriksson.StillgridSudoku"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
-STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-ui-state.XXXXXX.json")"
-SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/QuietSudoku-ui-save.XXXXXX.json")"
+STATE_FILE="$(mktemp "${TMPDIR:-/tmp}/StillgridSudoku-ui-state.XXXXXX.json")"
+SAVE_FILE="$(mktemp "${TMPDIR:-/tmp}/StillgridSudoku-ui-save.XXXXXX.json")"
 
 cleanup() {
   pkill -x "$APP_NAME" >/dev/null 2>&1 || true
@@ -20,8 +20,8 @@ trap cleanup EXIT
 pkill -x "$APP_NAME" >/dev/null 2>&1 || true
 
 /usr/bin/open -n \
-  --env "MACSUDOKU_UI_STATE_PATH=$STATE_FILE" \
-  --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
+  --env "STILLGRID_SUDOKU_UI_STATE_PATH=$STATE_FILE" \
+  --env "STILLGRID_SUDOKU_SAVE_PATH=$SAVE_FILE" \
   "$APP_BUNDLE"
 
 wait_for_state() {
@@ -135,7 +135,7 @@ func findElement(identifier: String, in element: AXUIElement) -> AXUIElement? {
 }
 
 guard let app = NSRunningApplication(processIdentifier: pid) else {
-    fputs("Could not find running Quiet Sudoku app\n", stderr)
+    fputs("Could not find running Stillgrid Sudoku app\n", stderr)
     exit(1)
 }
 
@@ -171,8 +171,8 @@ rm -f "$STATE_FILE"
 touch "$STATE_FILE"
 
 /usr/bin/open -n \
-  --env "MACSUDOKU_UI_STATE_PATH=$STATE_FILE" \
-  --env "MACSUDOKU_SAVE_PATH=$SAVE_FILE" \
+  --env "STILLGRID_SUDOKU_UI_STATE_PATH=$STATE_FILE" \
+  --env "STILLGRID_SUDOKU_SAVE_PATH=$SAVE_FILE" \
   "$APP_BUNDLE"
 
 wait_for_state 'cell('"$first_row"', '"$first_column"')["value"] is None and cell('"$first_row"', '"$first_column"')["candidateValue"] == 4' "saved floating candidate restores after relaunch"
