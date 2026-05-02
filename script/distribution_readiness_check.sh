@@ -5,8 +5,8 @@ APP_NAME="StillgridSudoku"
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
 INFO_PLIST="$APP_BUNDLE/Contents/Info.plist"
-ENTITLEMENTS_PATH="${STILLGRID_SUDOKU_ENTITLEMENTS_PATH:-$ROOT_DIR/Config/StillgridSudoku.entitlements}"
-EXPECTED_BUNDLE_ID="${STILLGRID_SUDOKU_BUNDLE_ID:-se.jonaseriksson.macSudoku}"
+ENTITLEMENTS_PATH="${STILLGRID_SUDOKU_ENTITLEMENTS_PATH:-${MACSUDOKU_ENTITLEMENTS_PATH:-$ROOT_DIR/Config/StillgridSudoku.entitlements}}"
+EXPECTED_BUNDLE_ID="${STILLGRID_SUDOKU_BUNDLE_ID:-${MACSUDOKU_BUNDLE_ID:-se.jonaseriksson.macSudoku}}"
 
 failures=0
 

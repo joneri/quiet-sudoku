@@ -114,6 +114,10 @@ def add_traffic_light_colors(window_capture: Image.Image) -> Image.Image:
     radius = 14
     for (cx, cy), color in buttons:
         draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius), fill=color)
+
+    title_font = load_font(FONT_BOLD, 32)
+    draw.rounded_rectangle((240, 54, 520, 110), radius=8, fill=(28, 31, 31, 255))
+    draw.text((260, 63), "Stillgrid Sudoku", font=title_font, fill=(92, 96, 98, 255))
     return recolored
 
 
