@@ -80,8 +80,22 @@ h2 {
 .actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.8rem;
   margin-top: 2.1rem;
+}
+
+.store-badge {
+  display: inline-flex;
+  min-height: 56px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+
+.store-badge img {
+  width: 178px;
+  min-width: 178px;
 }
 
 .button {
@@ -183,6 +197,19 @@ figcaption {
   font-weight: 700;
 }
 
+footer {
+  padding: 1.4rem max(2rem, 7vw) 2rem;
+  background: #211f25;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+footer p {
+  max-width: 70rem;
+  margin-bottom: 0;
+  color: #bdb6be;
+  font-size: 0.78rem;
+}
+
 @media (max-width: 800px) {
   .hero {
     min-height: 82vh;
@@ -198,7 +225,8 @@ figcaption {
 
   .summary,
   .screenshots,
-  .privacy {
+  .privacy,
+  footer {
     padding-left: 1.4rem;
     padding-right: 1.4rem;
   }
